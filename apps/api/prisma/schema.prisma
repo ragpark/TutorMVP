@@ -1,27 +1,280 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
-enum Role { ADMIN TEACHER LEARNER }
-enum CognitiveLevel { REMEMBER UNDERSTAND APPLY ANALYZE EVALUATE CREATE }
-enum MasteryStatus { NOT_STARTED INTRODUCED PRACTICING PARTIAL MASTERED NEEDS_REVIEW }
-enum AssessmentItemType { MULTIPLE_CHOICE SHORT_ANSWER TRUE_FALSE }
-enum GraphNodeType { COURSE MODULE TOPIC LEARNING_OBJECTIVE CONCEPT RESOURCE ASSESSMENT_ITEM MISCONCEPTION }
-enum GraphEdgeType { CONTAINS REQUIRES_CONCEPT DEPENDS_ON UNLOCKS ASSESSES TEACHES REMEDIATES RELATED_TO }
-enum RecommendationActionType { START_NEW_LO REVIEW_LO PRACTICE_LO REMEDIATE_PREREQUISITE TAKE_DIAGNOSTIC ASK_TUTOR COMPLETE_ASSESSMENT }
-model User { id String @id @default(cuid()) email String @unique name String role Role createdAt DateTime @default(now()) profile LearnerProfile? activities LearnerActivity[] attempts AssessmentAttempt[] tutorSessions TutorSession[] }
-model LearnerProfile { id String @id @default(cuid()) learnerId String @unique learner User @relation(fields:[learnerId], references:[id]) gradeLevel String? goals String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Course { id String @id @default(cuid()) title String description String modules Module[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Module { id String @id @default(cuid()) title String order Int courseId String course Course @relation(fields:[courseId], references:[id]) topics Topic[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Topic { id String @id @default(cuid()) title String order Int moduleId String module Module @relation(fields:[moduleId], references:[id]) learningObjectives LearningObjective[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model LearningObjective { id String @id @default(cuid()) code String @unique title String description String cognitiveLevel CognitiveLevel estimatedMinutes Int @default(20) difficulty Int @default(1) topicId String topic Topic @relation(fields:[topicId], references:[id]) resources Resource[] assessmentItems AssessmentItem[] masteries LearnerMastery[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Concept { id String @id @default(cuid()) slug String @unique title String description String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model GraphNode { id String @id @default(cuid()) type GraphNodeType entityId String label String metadata Json? outgoing GraphEdge[] @relation("Source") incoming GraphEdge[] @relation("Target") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@unique([type, entityId]) }
-model GraphEdge { id String @id @default(cuid()) sourceNodeId String targetNodeId String type GraphEdgeType weight Float @default(1) metadata Json? source GraphNode @relation("Source", fields:[sourceNodeId], references:[id]) target GraphNode @relation("Target", fields:[targetNodeId], references:[id]) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Resource { id String @id @default(cuid()) title String type String url String? content String learningObjectiveId String learningObjective LearningObjective @relation(fields:[learningObjectiveId], references:[id]) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model AssessmentItem { id String @id @default(cuid()) learningObjectiveId String learningObjective LearningObjective @relation(fields:[learningObjectiveId], references:[id]) type AssessmentItemType prompt String choices Json? correctAnswer String? explanation String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt responses AssessmentResponse[] }
-model AssessmentAttempt { id String @id @default(cuid()) learnerId String learner User @relation(fields:[learnerId], references:[id]) score Float status String @default("SUBMITTED") createdAt DateTime @default(now()) responses AssessmentResponse[] }
-model AssessmentResponse { id String @id @default(cuid()) attemptId String itemId String response String isCorrect Boolean? attempt AssessmentAttempt @relation(fields:[attemptId], references:[id]) item AssessmentItem @relation(fields:[itemId], references:[id]) createdAt DateTime @default(now()) }
-model LearnerMastery { id String @id @default(cuid()) learnerId String learningObjectiveId String masteryScore Float @default(0) confidenceScore Float @default(0.2) attemptCount Int @default(0) lastPracticedAt DateTime? lastAssessedAt DateTime? status MasteryStatus @default(NOT_STARTED) learningObjective LearningObjective @relation(fields:[learningObjectiveId], references:[id]) @@unique([learnerId, learningObjectiveId]) }
-model LearnerActivity { id String @id @default(cuid()) learnerId String learner User @relation(fields:[learnerId], references:[id]) learningObjectiveId String? type String summary String createdAt DateTime @default(now()) }
-model Recommendation { id String @id @default(cuid()) learnerId String actionType RecommendationActionType targetLearningObjectiveId String? targetResourceId String? reason String confidence Float alternatives Json createdAt DateTime @default(now()) }
-model TutorSession { id String @id @default(cuid()) learnerId String learner User @relation(fields:[learnerId], references:[id]) currentLearningObjectiveId String createdAt DateTime @default(now()) updatedAt DateTime @updatedAt messages TutorMessage[] }
-model TutorMessage { id String @id @default(cuid()) sessionId String role String content String metadata Json? session TutorSession @relation(fields:[sessionId], references:[id]) createdAt DateTime @default(now()) }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  LEARNER
+}
+
+enum CognitiveLevel {
+  REMEMBER
+  UNDERSTAND
+  APPLY
+  ANALYZE
+  EVALUATE
+  CREATE
+}
+
+enum MasteryStatus {
+  NOT_STARTED
+  INTRODUCED
+  PRACTICING
+  PARTIAL
+  MASTERED
+  NEEDS_REVIEW
+}
+
+enum AssessmentItemType {
+  MULTIPLE_CHOICE
+  SHORT_ANSWER
+  TRUE_FALSE
+}
+
+enum GraphNodeType {
+  COURSE
+  MODULE
+  TOPIC
+  LEARNING_OBJECTIVE
+  CONCEPT
+  RESOURCE
+  ASSESSMENT_ITEM
+  MISCONCEPTION
+}
+
+enum GraphEdgeType {
+  CONTAINS
+  REQUIRES_CONCEPT
+  DEPENDS_ON
+  UNLOCKS
+  ASSESSES
+  TEACHES
+  REMEDIATES
+  RELATED_TO
+}
+
+enum RecommendationActionType {
+  START_NEW_LO
+  REVIEW_LO
+  PRACTICE_LO
+  REMEDIATE_PREREQUISITE
+  TAKE_DIAGNOSTIC
+  ASK_TUTOR
+  COMPLETE_ASSESSMENT
+}
+
+model User {
+  id            String              @id @default(cuid())
+  email         String              @unique
+  name          String
+  role          Role
+  createdAt     DateTime            @default(now())
+  profile       LearnerProfile?
+  activities    LearnerActivity[]
+  attempts      AssessmentAttempt[]
+  tutorSessions TutorSession[]
+}
+
+model LearnerProfile {
+  id         String   @id @default(cuid())
+  learnerId  String   @unique
+  learner    User     @relation(fields: [learnerId], references: [id])
+  gradeLevel String?
+  goals      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  modules     Module[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  topics    Topic[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Topic {
+  id                 String              @id @default(cuid())
+  title              String
+  order              Int
+  moduleId           String
+  module             Module              @relation(fields: [moduleId], references: [id])
+  learningObjectives LearningObjective[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model LearningObjective {
+  id               String           @id @default(cuid())
+  code             String           @unique
+  title            String
+  description      String
+  cognitiveLevel   CognitiveLevel
+  estimatedMinutes Int              @default(20)
+  difficulty       Int              @default(1)
+  topicId          String
+  topic            Topic            @relation(fields: [topicId], references: [id])
+  resources        Resource[]
+  assessmentItems  AssessmentItem[]
+  masteries        LearnerMastery[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Concept {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GraphNode {
+  id        String        @id @default(cuid())
+  type      GraphNodeType
+  entityId  String
+  label     String
+  metadata  Json?
+  outgoing  GraphEdge[]   @relation("Source")
+  incoming  GraphEdge[]   @relation("Target")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([type, entityId])
+}
+
+model GraphEdge {
+  id           String        @id @default(cuid())
+  sourceNodeId String
+  targetNodeId String
+  type         GraphEdgeType
+  weight       Float         @default(1)
+  metadata     Json?
+  source       GraphNode     @relation("Source", fields: [sourceNodeId], references: [id])
+  target       GraphNode     @relation("Target", fields: [targetNodeId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Resource {
+  id                  String            @id @default(cuid())
+  title               String
+  type                String
+  url                 String?
+  content             String
+  learningObjectiveId String
+  learningObjective   LearningObjective @relation(fields: [learningObjectiveId], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model AssessmentItem {
+  id                  String               @id @default(cuid())
+  learningObjectiveId String
+  learningObjective   LearningObjective    @relation(fields: [learningObjectiveId], references: [id])
+  type                AssessmentItemType
+  prompt              String
+  choices             Json?
+  correctAnswer       String?
+  explanation         String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  responses           AssessmentResponse[]
+}
+
+model AssessmentAttempt {
+  id        String               @id @default(cuid())
+  learnerId String
+  learner   User                 @relation(fields: [learnerId], references: [id])
+  score     Float
+  status    String               @default("SUBMITTED")
+  createdAt DateTime             @default(now())
+  responses AssessmentResponse[]
+}
+
+model AssessmentResponse {
+  id        String            @id @default(cuid())
+  attemptId String
+  itemId    String
+  response  String
+  isCorrect Boolean?
+  attempt   AssessmentAttempt @relation(fields: [attemptId], references: [id])
+  item      AssessmentItem    @relation(fields: [itemId], references: [id])
+  createdAt DateTime          @default(now())
+}
+
+model LearnerMastery {
+  id                  String            @id @default(cuid())
+  learnerId           String
+  learningObjectiveId String
+  masteryScore        Float             @default(0)
+  confidenceScore     Float             @default(0.2)
+  attemptCount        Int               @default(0)
+  lastPracticedAt     DateTime?
+  lastAssessedAt      DateTime?
+  status              MasteryStatus     @default(NOT_STARTED)
+  learningObjective   LearningObjective @relation(fields: [learningObjectiveId], references: [id])
+
+  @@unique([learnerId, learningObjectiveId])
+}
+
+model LearnerActivity {
+  id                  String   @id @default(cuid())
+  learnerId           String
+  learner             User     @relation(fields: [learnerId], references: [id])
+  learningObjectiveId String?
+  type                String
+  summary             String
+  createdAt           DateTime @default(now())
+}
+
+model Recommendation {
+  id                        String                    @id @default(cuid())
+  learnerId                 String
+  actionType                RecommendationActionType
+  targetLearningObjectiveId String?
+  targetResourceId          String?
+  reason                    String
+  confidence                Float
+  alternatives              Json
+  createdAt                 DateTime                  @default(now())
+}
+
+model TutorSession {
+  id                         String         @id @default(cuid())
+  learnerId                  String
+  learner                    User           @relation(fields: [learnerId], references: [id])
+  currentLearningObjectiveId String
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
+  messages                   TutorMessage[]
+}
+
+model TutorMessage {
+  id        String       @id @default(cuid())
+  sessionId String
+  role      String
+  content   String
+  metadata  Json?
+  session   TutorSession @relation(fields: [sessionId], references: [id])
+  createdAt DateTime     @default(now())
+}
