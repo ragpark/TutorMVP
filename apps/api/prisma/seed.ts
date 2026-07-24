@@ -260,6 +260,13 @@ const courseSeed = {
   ],
 } as const;
 
+const expectedLearningObjectiveCount = courseSeed.modules.reduce(
+  (moduleTotal, moduleSeed) =>
+    moduleTotal +
+    moduleSeed.topics.reduce((topicTotal, topicSeed) => topicTotal + topicSeed.learningObjectives.length, 0),
+  0,
+);
+
 type GraphNodeTypeValue = (typeof GraphNodeType)[keyof typeof GraphNodeType];
 type GraphEdgeTypeValue = (typeof GraphEdgeType)[keyof typeof GraphEdgeType];
 type CreatedNode = {id: string; type: GraphNodeTypeValue; entityId: string};
@@ -288,10 +295,22 @@ async function main() {
   const existingCourse = await prisma.course.findFirst({where: {title: courseSeed.title}});
 
   if (existingCourse && process.env.FORCE_SEED !== 'true') {
-    console.log(
-      `${courseSeed.title} seed data already exists. Set FORCE_SEED=true to reset and reseed the MVP dataset.`,
-    );
-    return;
+    const [learningObjectiveCount, graphNodeCount, graphEdgeCount] = await Promise.all([
+      prisma.learningObjective.count({
+        where: {topic: {module: {courseId: existingCourse.id}}},
+      }),
+      prisma.graphNode.count(),
+      prisma.graphEdge.count(),
+    ]);
+
+    if (learningObjectiveCount >= expectedLearningObjectiveCount && graphNodeCount > 0 && graphEdgeCount > 0) {
+      console.log(
+        `${courseSeed.title} seed data already exists. Set FORCE_SEED=true to reset and reseed the MVP dataset.`,
+      );
+      return;
+    }
+
+    console.log(`${courseSeed.title} seed data is incomplete; resetting and reseeding the MVP dataset.`);
   }
 
   const [, , learner] = await Promise.all([
