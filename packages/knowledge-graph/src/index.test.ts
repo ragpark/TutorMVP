@@ -1,0 +1,2 @@
+import {expect,it} from 'vitest'; import {detectCircularDependencies,getPrerequisitesForLo} from './index.js';
+it('traverses prereqs and detects cycles',()=>{const n=[{id:'a',type:'LEARNING_OBJECTIVE',entityId:'lo1',label:'1'},{id:'b',type:'LEARNING_OBJECTIVE',entityId:'lo2',label:'2'}]; const e=[{sourceNodeId:'a',targetNodeId:'b',type:'DEPENDS_ON'},{sourceNodeId:'b',targetNodeId:'a',type:'DEPENDS_ON'}]; expect(getPrerequisitesForLo(n,e,'lo1')).toHaveLength(1); expect(detectCircularDependencies(n,e).length).toBeGreaterThan(0);});

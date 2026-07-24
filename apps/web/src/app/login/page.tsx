@@ -1,0 +1,1 @@
+export default function Login(){return <div className="card"><h1 className="text-2xl font-bold">Demo Login</h1><p>Seeded accounts: admin@example.com, teacher@example.com, learner@example.com. MVP auth uses documented demo users and role selection.</p><a className="btn mt-4 inline-block" href="/dashboard">Continue as learner</a></div>}
