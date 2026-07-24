@@ -285,6 +285,15 @@ async function createGraphEdge(source: CreatedNode, target: CreatedNode, type: G
 }
 
 async function main() {
+  const existingCourse = await prisma.course.findFirst({where: {title: courseSeed.title}});
+
+  if (existingCourse && process.env.FORCE_SEED !== 'true') {
+    console.log(
+      `${courseSeed.title} seed data already exists. Set FORCE_SEED=true to reset and reseed the MVP dataset.`,
+    );
+    return;
+  }
+
   const [, , learner] = await Promise.all([
     prisma.user.upsert({
       where: {email: 'admin@example.com'},
