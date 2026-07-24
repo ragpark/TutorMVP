@@ -17,4 +17,6 @@ Each Railway service **must** have its **Root Directory** (Settings → Source) 
 
 Because Railpack's package-manager detection (the step that installs pnpm via Corepack) also only scans the Root Directory's `package.json`, every `apps/*/package.json` carries its own `"packageManager": "pnpm@9.12.0"` field — without it, Railpack scoped to a subfolder assumes plain npm/Node, never installs pnpm, and the build command fails with `pnpm: not found`. Keep this field in sync with the root `package.json`'s `packageManager` value if you ever bump the pnpm version.
 
+For the same reason, `turbo` is listed as a `devDependency` in every `apps/*/package.json`, not just the repo root. pnpm only symlinks a package's bin into that package's own `node_modules/.bin`; with Root Directory scoped to `apps/web` (etc.), `pnpm turbo run build ...` runs from inside that folder, and if `turbo` is only declared at the workspace root it fails with `Command "turbo" not found`. Keep the `turbo` devDependency version in sync across the root and every app if you ever bump it.
+
 If Railway executes from the repository root, keep the commands exactly as above. After deployment, run `pnpm db:seed` once from the API service shell to create demo users and Algebra Foundations curriculum. If Redis is absent locally, worker behavior falls back synchronously for MVP jobs.
