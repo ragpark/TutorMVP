@@ -1,1 +1,1 @@
-{"deploy":{"startCommand":"pnpm start --filter worker"}}
+{"build":{"buildCommand":"pnpm install --frozen-lockfile && pnpm turbo run build --filter=worker..."},"deploy":{"startCommand":"pnpm start --filter worker"}}

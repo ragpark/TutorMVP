@@ -1,0 +1,1 @@
+{"build":{"buildCommand":"pnpm install --frozen-lockfile && pnpm turbo run build --filter=web..."},"deploy":{"startCommand":"pnpm start --filter web"}}
