@@ -1,1 +1,25 @@
-import {getJson} from '../../lib'; export default async function Graph(){const v=await getJson('/admin/graph/validate')??{nodeCount:0,edgeCount:0,circularDependencies:[],orphanedLearningObjectives:[]}; return <div className="card"><h1 className="text-2xl font-bold">Knowledge Graph Validation</h1><p>Nodes: {v.nodeCount}</p><p>Edges: {v.edgeCount}</p><h2 className="mt-4 font-bold">Circular dependency warnings</h2><pre className="bg-slate-100 p-3 rounded">{JSON.stringify(v.circularDependencies,null,2)}</pre><h2 className="mt-4 font-bold">Orphaned LO warnings</h2><pre className="bg-slate-100 p-3 rounded">{JSON.stringify(v.orphanedLearningObjectives,null,2)}</pre><button className="btn mt-4">Seed curriculum</button></div>}
+import { getJson } from '../../lib';
+export default async function Graph() {
+  const v = (await getJson('/admin/graph/validate')) ?? {
+    nodeCount: 0,
+    edgeCount: 0,
+    circularDependencies: [],
+    orphanedLearningObjectives: [],
+  };
+  return (
+    <div className="card">
+      <h1 className="text-2xl font-bold">Knowledge Graph Validation</h1>
+      <p>Nodes: {v.nodeCount}</p>
+      <p>Edges: {v.edgeCount}</p>
+      <h2 className="mt-4 font-bold">Circular dependency warnings</h2>
+      <pre className="bg-slate-100 p-3 rounded">
+        {JSON.stringify(v.circularDependencies, null, 2)}
+      </pre>
+      <h2 className="mt-4 font-bold">Orphaned LO warnings</h2>
+      <pre className="bg-slate-100 p-3 rounded">
+        {JSON.stringify(v.orphanedLearningObjectives, null, 2)}
+      </pre>
+      <button className="btn mt-4">Seed curriculum</button>
+    </div>
+  );
+}

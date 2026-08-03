@@ -3,6 +3,7 @@
 Create a Railway project connected to the GitHub monorepo. Add services: `web`, `api`, `worker`, PostgreSQL, and Redis. Configure variables from `.env.example`; use Railway-provided `DATABASE_URL` and `REDIS_URL`.
 
 Recommended settings (each service also has a checked-in `railway.json` in its app directory with matching `build.buildCommand` / `deploy.startCommand`):
+
 - web root: `apps/web`; build: `pnpm install --frozen-lockfile && pnpm build`; start: `pnpm start`.
 - api root: `apps/api`; build: `pnpm install --frozen-lockfile && pnpm db:generate && pnpm turbo run build --filter=api...`; start: `pnpm db:deploy && pnpm db:seed && pnpm start`.
 - worker root: `apps/worker`; build: `pnpm install --frozen-lockfile && pnpm turbo run build --filter=worker...`; start: `pnpm start --filter worker`.

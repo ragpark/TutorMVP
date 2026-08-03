@@ -1,1 +1,4 @@
-{"build":{"buildCommand":"pnpm install --frozen-lockfile && pnpm build"},"deploy":{"startCommand":"pnpm start"}}
+{
+  "build": { "buildCommand": "pnpm install --frozen-lockfile && pnpm build" },
+  "deploy": { "startCommand": "pnpm start" }
+}

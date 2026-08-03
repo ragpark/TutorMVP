@@ -1,4 +1,4 @@
-import {PrismaClient} from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -32,8 +32,8 @@ const GraphNodeType = {
   ASSESSMENT_ITEM: 'ASSESSMENT_ITEM',
 } as const;
 
-const RecommendationActionType = {TAKE_DIAGNOSTIC: 'TAKE_DIAGNOSTIC'} as const;
-const Role = {ADMIN: 'ADMIN', TEACHER: 'TEACHER', LEARNER: 'LEARNER'} as const;
+const RecommendationActionType = { TAKE_DIAGNOSTIC: 'TAKE_DIAGNOSTIC' } as const;
+const Role = { ADMIN: 'ADMIN', TEACHER: 'TEACHER', LEARNER: 'LEARNER' } as const;
 
 const courseSeed = {
   title: 'Algebra Foundations',
@@ -65,7 +65,12 @@ const courseSeed = {
                 {
                   type: AssessmentItemType.MULTIPLE_CHOICE,
                   prompt: 'In the expression x + 4, what does x represent?',
-                  choices: ['A value that can vary or be unknown', 'Always the number 4', 'An operation', 'An equal sign'],
+                  choices: [
+                    'A value that can vary or be unknown',
+                    'Always the number 4',
+                    'An operation',
+                    'An equal sign',
+                  ],
                   correctAnswer: 'A value that can vary or be unknown',
                   explanation: 'A variable is a symbol for an unknown or changing value.',
                 },
@@ -161,7 +166,8 @@ const courseSeed = {
             {
               code: 'ALG-EQ-002',
               title: 'Solve one-step equations',
-              description: 'Solve one-step linear equations in one variable while preserving equality.',
+              description:
+                'Solve one-step linear equations in one variable while preserving equality.',
               cognitiveLevel: CognitiveLevel.APPLY,
               estimatedMinutes: 25,
               difficulty: 3,
@@ -193,7 +199,8 @@ const courseSeed = {
             {
               code: 'ALG-EQ-003',
               title: 'Solve two-step equations',
-              description: 'Solve two-step linear equations by reversing operations in the correct order.',
+              description:
+                'Solve two-step linear equations by reversing operations in the correct order.',
               cognitiveLevel: CognitiveLevel.APPLY,
               estimatedMinutes: 30,
               difficulty: 4,
@@ -230,7 +237,8 @@ const courseSeed = {
             {
               code: 'ALG-GRAPH-001',
               title: 'Understand coordinate pairs',
-              description: 'Interpret ordered pairs on the coordinate plane using x- and y-coordinates.',
+              description:
+                'Interpret ordered pairs on the coordinate plane using x- and y-coordinates.',
               cognitiveLevel: CognitiveLevel.UNDERSTAND,
               estimatedMinutes: 20,
               difficulty: 2,
@@ -263,23 +271,37 @@ const courseSeed = {
 const expectedLearningObjectiveCount = courseSeed.modules.reduce(
   (moduleTotal, moduleSeed) =>
     moduleTotal +
-    moduleSeed.topics.reduce((topicTotal, topicSeed) => topicTotal + topicSeed.learningObjectives.length, 0),
+    moduleSeed.topics.reduce(
+      (topicTotal, topicSeed) => topicTotal + topicSeed.learningObjectives.length,
+      0,
+    ),
   0,
 );
 
 type GraphNodeTypeValue = (typeof GraphNodeType)[keyof typeof GraphNodeType];
 type GraphEdgeTypeValue = (typeof GraphEdgeType)[keyof typeof GraphEdgeType];
-type CreatedNode = {id: string; type: GraphNodeTypeValue; entityId: string};
+type CreatedNode = { id: string; type: GraphNodeTypeValue; entityId: string };
 
-async function createGraphNode(type: GraphNodeTypeValue, entityId: string, label: string, metadata?: object) {
+async function createGraphNode(
+  type: GraphNodeTypeValue,
+  entityId: string,
+  label: string,
+  metadata?: object,
+) {
   return prisma.graphNode.upsert({
-    where: {type_entityId: {type, entityId}},
-    update: {label, metadata},
-    create: {type, entityId, label, metadata},
+    where: { type_entityId: { type, entityId } },
+    update: { label, metadata },
+    create: { type, entityId, label, metadata },
   });
 }
 
-async function createGraphEdge(source: CreatedNode, target: CreatedNode, type: GraphEdgeTypeValue, weight = 1, metadata?: object) {
+async function createGraphEdge(
+  source: CreatedNode,
+  target: CreatedNode,
+  type: GraphEdgeTypeValue,
+  weight = 1,
+  metadata?: object,
+) {
   return prisma.graphEdge.create({
     data: {
       sourceNodeId: source.id,
@@ -292,64 +314,70 @@ async function createGraphEdge(source: CreatedNode, target: CreatedNode, type: G
 }
 
 async function main() {
-  const existingCourse = await prisma.course.findFirst({where: {title: courseSeed.title}});
+  const existingCourse = await prisma.course.findFirst({ where: { title: courseSeed.title } });
 
   if (existingCourse && process.env.FORCE_SEED !== 'true') {
     const [learningObjectiveCount, graphNodeCount, graphEdgeCount] = await Promise.all([
       prisma.learningObjective.count({
-        where: {topic: {module: {courseId: existingCourse.id}}},
+        where: { topic: { module: { courseId: existingCourse.id } } },
       }),
       prisma.graphNode.count(),
       prisma.graphEdge.count(),
     ]);
 
-    if (learningObjectiveCount >= expectedLearningObjectiveCount && graphNodeCount > 0 && graphEdgeCount > 0) {
+    if (
+      learningObjectiveCount >= expectedLearningObjectiveCount &&
+      graphNodeCount > 0 &&
+      graphEdgeCount > 0
+    ) {
       console.log(
         `${courseSeed.title} seed data already exists. Set FORCE_SEED=true to reset and reseed the MVP dataset.`,
       );
       return;
     }
 
-    console.log(`${courseSeed.title} seed data is incomplete; resetting and reseeding the MVP dataset.`);
+    console.log(
+      `${courseSeed.title} seed data is incomplete; resetting and reseeding the MVP dataset.`,
+    );
   }
 
   const [, , learner] = await Promise.all([
     prisma.user.upsert({
-      where: {email: 'admin@example.com'},
-      update: {name: 'Demo Admin', role: Role.ADMIN},
-      create: {email: 'admin@example.com', name: 'Demo Admin', role: Role.ADMIN},
+      where: { email: 'admin@example.com' },
+      update: { name: 'Demo Admin', role: Role.ADMIN },
+      create: { email: 'admin@example.com', name: 'Demo Admin', role: Role.ADMIN },
     }),
     prisma.user.upsert({
-      where: {email: 'teacher@example.com'},
-      update: {name: 'Demo Teacher', role: Role.TEACHER},
-      create: {email: 'teacher@example.com', name: 'Demo Teacher', role: Role.TEACHER},
+      where: { email: 'teacher@example.com' },
+      update: { name: 'Demo Teacher', role: Role.TEACHER },
+      create: { email: 'teacher@example.com', name: 'Demo Teacher', role: Role.TEACHER },
     }),
     prisma.user.upsert({
-      where: {email: 'learner@example.com'},
-      update: {name: 'Demo Learner', role: Role.LEARNER},
+      where: { email: 'learner@example.com' },
+      update: { name: 'Demo Learner', role: Role.LEARNER },
       create: {
         email: 'learner@example.com',
         name: 'Demo Learner',
         role: Role.LEARNER,
-        profile: {create: {gradeLevel: '8', goals: 'Build algebra confidence'}},
+        profile: { create: { gradeLevel: '8', goals: 'Build algebra confidence' } },
       },
     }),
   ]);
 
   await prisma.learnerProfile.upsert({
-    where: {learnerId: learner.id},
-    update: {gradeLevel: '8', goals: 'Build algebra confidence'},
-    create: {learnerId: learner.id, gradeLevel: '8', goals: 'Build algebra confidence'},
+    where: { learnerId: learner.id },
+    update: { gradeLevel: '8', goals: 'Build algebra confidence' },
+    create: { learnerId: learner.id, gradeLevel: '8', goals: 'Build algebra confidence' },
   });
 
   await prisma.$transaction([
-    prisma.recommendation.deleteMany({where: {learnerId: learner.id}}),
-    prisma.learnerActivity.deleteMany({where: {learnerId: learner.id}}),
-    prisma.learnerMastery.deleteMany({where: {learnerId: learner.id}}),
+    prisma.recommendation.deleteMany({ where: { learnerId: learner.id } }),
+    prisma.learnerActivity.deleteMany({ where: { learnerId: learner.id } }),
+    prisma.learnerMastery.deleteMany({ where: { learnerId: learner.id } }),
     prisma.assessmentResponse.deleteMany(),
-    prisma.assessmentAttempt.deleteMany({where: {learnerId: learner.id}}),
+    prisma.assessmentAttempt.deleteMany({ where: { learnerId: learner.id } }),
     prisma.tutorMessage.deleteMany(),
-    prisma.tutorSession.deleteMany({where: {learnerId: learner.id}}),
+    prisma.tutorSession.deleteMany({ where: { learnerId: learner.id } }),
     prisma.graphEdge.deleteMany(),
     prisma.graphNode.deleteMany(),
     prisma.assessmentItem.deleteMany(),
@@ -358,31 +386,41 @@ async function main() {
     prisma.concept.deleteMany(),
     prisma.topic.deleteMany(),
     prisma.module.deleteMany(),
-    prisma.course.deleteMany({where: {title: courseSeed.title}}),
+    prisma.course.deleteMany({ where: { title: courseSeed.title } }),
   ]);
 
   const nodesByKey = new Map<string, CreatedNode>();
   const learningObjectiveIdsByCode = new Map<string, string>();
 
   const course = await prisma.course.create({
-    data: {title: courseSeed.title, description: courseSeed.description},
+    data: { title: courseSeed.title, description: courseSeed.description },
   });
-  const courseNode = await createGraphNode(GraphNodeType.COURSE, course.id, course.title, {description: course.description});
+  const courseNode = await createGraphNode(GraphNodeType.COURSE, course.id, course.title, {
+    description: course.description,
+  });
   nodesByKey.set(`course:${course.title}`, courseNode);
 
   for (const [moduleIndex, moduleSeed] of courseSeed.modules.entries()) {
     const module = await prisma.module.create({
-      data: {title: moduleSeed.title, order: moduleIndex + 1, courseId: course.id},
+      data: { title: moduleSeed.title, order: moduleIndex + 1, courseId: course.id },
     });
-    const moduleNode = await createGraphNode(GraphNodeType.MODULE, module.id, module.title, {order: module.order});
-    await createGraphEdge(courseNode, moduleNode, GraphEdgeType.CONTAINS, 1, {order: module.order});
+    const moduleNode = await createGraphNode(GraphNodeType.MODULE, module.id, module.title, {
+      order: module.order,
+    });
+    await createGraphEdge(courseNode, moduleNode, GraphEdgeType.CONTAINS, 1, {
+      order: module.order,
+    });
 
     for (const [topicIndex, topicSeed] of moduleSeed.topics.entries()) {
       const topic = await prisma.topic.create({
-        data: {title: topicSeed.title, order: topicIndex + 1, moduleId: module.id},
+        data: { title: topicSeed.title, order: topicIndex + 1, moduleId: module.id },
       });
-      const topicNode = await createGraphNode(GraphNodeType.TOPIC, topic.id, topic.title, {order: topic.order});
-      await createGraphEdge(moduleNode, topicNode, GraphEdgeType.CONTAINS, 1, {order: topic.order});
+      const topicNode = await createGraphNode(GraphNodeType.TOPIC, topic.id, topic.title, {
+        order: topic.order,
+      });
+      await createGraphEdge(moduleNode, topicNode, GraphEdgeType.CONTAINS, 1, {
+        order: topic.order,
+      });
 
       for (const learningObjectiveSeed of topicSeed.learningObjectives) {
         const learningObjective = await prisma.learningObjective.create({
@@ -410,38 +448,62 @@ async function main() {
           },
         );
         nodesByKey.set(`lo:${learningObjective.code}`, learningObjectiveNode);
-        await createGraphEdge(topicNode, learningObjectiveNode, GraphEdgeType.CONTAINS, 1, {order: topic.order});
+        await createGraphEdge(topicNode, learningObjectiveNode, GraphEdgeType.CONTAINS, 1, {
+          order: topic.order,
+        });
 
         await prisma.learnerMastery.create({
-          data: {learnerId: learner.id, learningObjectiveId: learningObjective.id},
+          data: { learnerId: learner.id, learningObjectiveId: learningObjective.id },
         });
 
         for (const conceptTitle of learningObjectiveSeed.concepts) {
           const slug = conceptTitle.replaceAll(' ', '-');
           const concept = await prisma.concept.upsert({
-            where: {slug},
-            update: {title: conceptTitle, description: `Core Algebra Foundations concept: ${conceptTitle}`},
-            create: {slug, title: conceptTitle, description: `Core Algebra Foundations concept: ${conceptTitle}`},
+            where: { slug },
+            update: {
+              title: conceptTitle,
+              description: `Core Algebra Foundations concept: ${conceptTitle}`,
+            },
+            create: {
+              slug,
+              title: conceptTitle,
+              description: `Core Algebra Foundations concept: ${conceptTitle}`,
+            },
           });
-          const conceptNode = await createGraphNode(GraphNodeType.CONCEPT, concept.id, concept.title, {slug: concept.slug});
+          const conceptNode = await createGraphNode(
+            GraphNodeType.CONCEPT,
+            concept.id,
+            concept.title,
+            { slug: concept.slug },
+          );
           await createGraphEdge(learningObjectiveNode, conceptNode, GraphEdgeType.REQUIRES_CONCEPT);
         }
 
         for (const resourceSeed of learningObjectiveSeed.resources) {
           const resource = await prisma.resource.create({
-            data: {...resourceSeed, learningObjectiveId: learningObjective.id},
+            data: { ...resourceSeed, learningObjectiveId: learningObjective.id },
           });
-          const resourceNode = await createGraphNode(GraphNodeType.RESOURCE, resource.id, resource.title, {type: resource.type});
+          const resourceNode = await createGraphNode(
+            GraphNodeType.RESOURCE,
+            resource.id,
+            resource.title,
+            { type: resource.type },
+          );
           await createGraphEdge(resourceNode, learningObjectiveNode, GraphEdgeType.TEACHES);
         }
 
         for (const assessmentItemSeed of learningObjectiveSeed.assessmentItems) {
           const assessmentItem = await prisma.assessmentItem.create({
-            data: {...assessmentItemSeed, learningObjectiveId: learningObjective.id},
+            data: { ...assessmentItemSeed, learningObjectiveId: learningObjective.id },
           });
-          const assessmentNode = await createGraphNode(GraphNodeType.ASSESSMENT_ITEM, assessmentItem.id, assessmentItem.prompt, {
-            type: assessmentItem.type,
-          });
+          const assessmentNode = await createGraphNode(
+            GraphNodeType.ASSESSMENT_ITEM,
+            assessmentItem.id,
+            assessmentItem.prompt,
+            {
+              type: assessmentItem.type,
+            },
+          );
           await createGraphEdge(assessmentNode, learningObjectiveNode, GraphEdgeType.ASSESSES);
         }
       }
@@ -456,7 +518,8 @@ async function main() {
 
         for (const prerequisiteCode of learningObjectiveSeed.prerequisites ?? []) {
           const prerequisiteNode = nodesByKey.get(`lo:${prerequisiteCode}`);
-          if (!prerequisiteNode) throw new Error(`Missing prerequisite LO node: ${prerequisiteCode}`);
+          if (!prerequisiteNode)
+            throw new Error(`Missing prerequisite LO node: ${prerequisiteCode}`);
 
           await createGraphEdge(sourceNode, prerequisiteNode, GraphEdgeType.DEPENDS_ON);
           await createGraphEdge(prerequisiteNode, sourceNode, GraphEdgeType.UNLOCKS);
@@ -471,7 +534,10 @@ async function main() {
       actionType: RecommendationActionType.TAKE_DIAGNOSTIC,
       reason: 'Start with the Algebra Foundations diagnostic to initialize mastery scores.',
       confidence: 0.95,
-      alternatives: [...learningObjectiveIdsByCode.entries()].map(([code, id]) => ({code, learningObjectiveId: id})),
+      alternatives: [...learningObjectiveIdsByCode.entries()].map(([code, id]) => ({
+        code,
+        learningObjectiveId: id,
+      })),
     },
   });
 

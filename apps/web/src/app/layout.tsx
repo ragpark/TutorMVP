@@ -1,1 +1,19 @@
-import './globals.css'; import Link from 'next/link'; export default function RootLayout({children}:{children:React.ReactNode}){return <html><body><nav className="flex gap-4 p-4 bg-white border-b"><Link href="/">Home</Link><Link href="/dashboard">Dashboard</Link><Link href="/courses">Courses</Link><Link href="/learn">Learn</Link><Link href="/tutor">Tutor</Link><Link href="/admin/graph">Admin Graph</Link></nav><main className="mx-auto max-w-6xl p-6">{children}</main></body></html>}
+import './globals.css';
+import Link from 'next/link';
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <nav className="flex gap-4 p-4 bg-white border-b">
+          <Link href="/">Home</Link>
+          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/courses">Courses</Link>
+          <Link href="/learn">Learn</Link>
+          <Link href="/tutor">Tutor</Link>
+          <Link href="/admin/graph">Admin Graph</Link>
+        </nav>
+        <main className="mx-auto max-w-6xl p-6">{children}</main>
+      </body>
+    </html>
+  );
+}

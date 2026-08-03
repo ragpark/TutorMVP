@@ -1,2 +1,51 @@
-import Link from 'next/link'; import {getJson,learnerId} from '../lib';
-export default async function Dashboard(){const mastery=await getJson(`/learners/${learnerId}/mastery`)??[]; const rec=await getJson(`/learners/${learnerId}/recommendations/current`)??{actionType:'TAKE_DIAGNOSTIC',reason:'Take a diagnostic to begin adaptive recommendations.'}; return <div className="grid gap-6"><section className="card"><h1 className="text-3xl font-bold">Learner Dashboard</h1><p className="mt-2 font-semibold">Next action: {rec.actionType}</p><p className="text-slate-600">{rec.reason}</p><div className="mt-4 flex gap-3"><Link className="btn" href="/assessment/diagnostic">Start diagnostic</Link><Link className="btn" href="/tutor">Ask tutor</Link></div></section><section className="card"><h2 className="text-xl font-bold">Mastery by Learning Objective</h2>{mastery.length?mastery.map((m:any)=><div key={m.id} className="mt-3"><div className="flex justify-between"><span>{m.learningObjective?.code} {m.learningObjective?.title}</span><span>{Math.round(m.masteryScore*100)}% {m.status}</span></div><div className="h-2 bg-slate-200 rounded"><div className="h-2 bg-emerald-500 rounded" style={{width:`${m.masteryScore*100}%`}}/></div></div>):<p>No mastery yet. Seed data and take the diagnostic.</p>}</section></div>}
+import Link from 'next/link';
+import { getJson, learnerId } from '../lib';
+export default async function Dashboard() {
+  const mastery = (await getJson(`/learners/${learnerId}/mastery`)) ?? [];
+  const rec = (await getJson(`/learners/${learnerId}/recommendations/current`)) ?? {
+    actionType: 'TAKE_DIAGNOSTIC',
+    reason: 'Take a diagnostic to begin adaptive recommendations.',
+  };
+  return (
+    <div className="grid gap-6">
+      <section className="card">
+        <h1 className="text-3xl font-bold">Learner Dashboard</h1>
+        <p className="mt-2 font-semibold">Next action: {rec.actionType}</p>
+        <p className="text-slate-600">{rec.reason}</p>
+        <div className="mt-4 flex gap-3">
+          <Link className="btn" href="/assessment/diagnostic">
+            Start diagnostic
+          </Link>
+          <Link className="btn" href="/tutor">
+            Ask tutor
+          </Link>
+        </div>
+      </section>
+      <section className="card">
+        <h2 className="text-xl font-bold">Mastery by Learning Objective</h2>
+        {mastery.length ? (
+          mastery.map((m: any) => (
+            <div key={m.id} className="mt-3">
+              <div className="flex justify-between">
+                <span>
+                  {m.learningObjective?.code} {m.learningObjective?.title}
+                </span>
+                <span>
+                  {Math.round(m.masteryScore * 100)}% {m.status}
+                </span>
+              </div>
+              <div className="h-2 bg-slate-200 rounded">
+                <div
+                  className="h-2 bg-emerald-500 rounded"
+                  style={{ width: `${m.masteryScore * 100}%` }}
+                />
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No mastery yet. Seed data and take the diagnostic.</p>
+        )}
+      </section>
+    </div>
+  );
+}

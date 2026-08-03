@@ -1,1 +1,12 @@
-@tailwind base;@tailwind components;@tailwind utilities; body{@apply bg-slate-50 text-slate-900}.card{@apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm}.btn{@apply rounded-xl bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+  @apply bg-slate-50 text-slate-900;
+}
+.card {
+  @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm;
+}
+.btn {
+  @apply rounded-xl bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700;
+}
