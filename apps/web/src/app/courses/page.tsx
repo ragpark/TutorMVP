@@ -1,1 +1,15 @@
-import Link from 'next/link'; import {getJson} from '../lib'; export default async function Courses(){const courses=await getJson('/courses')??[]; return <div className="card"><h1 className="text-2xl font-bold">Courses</h1>{courses.map((c:any)=><Link className="block mt-3 text-indigo-700" key={c.id} href={`/courses/${c.id}`}>{c.title}</Link>)}</div>}
+import Link from 'next/link';
+import { getJson } from '../lib';
+export default async function Courses() {
+  const courses = (await getJson('/courses')) ?? [];
+  return (
+    <div className="card">
+      <h1 className="text-2xl font-bold">Courses</h1>
+      {courses.map((c: any) => (
+        <Link className="block mt-3 text-indigo-700" key={c.id} href={`/courses/${c.id}`}>
+          {c.title}
+        </Link>
+      ))}
+    </div>
+  );
+}

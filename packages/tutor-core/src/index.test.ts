@@ -1,2 +1,20 @@
-import {describe,it,expect} from 'vitest'; import {MockTutorProvider} from './index.js';
-it('grounds mock reply in LO context', async()=>{const r=await new MockTutorProvider().generateTutorReply({learnerId:'l',currentLearningObjectiveId:'lo',learnerMessage:'help',context:{learningObjective:{code:'A',title:'Understand variables',description:'',cognitiveLevel:'UNDERSTAND'},concepts:[{title:'variable'}],prerequisites:[]}}); expect(r.message).toContain('Understand variables');});
+import { describe, it, expect } from 'vitest';
+import { MockTutorProvider } from './index.js';
+it('grounds mock reply in LO context', async () => {
+  const r = await new MockTutorProvider().generateTutorReply({
+    learnerId: 'l',
+    currentLearningObjectiveId: 'lo',
+    learnerMessage: 'help',
+    context: {
+      learningObjective: {
+        code: 'A',
+        title: 'Understand variables',
+        description: '',
+        cognitiveLevel: 'UNDERSTAND',
+      },
+      concepts: [{ title: 'variable' }],
+      prerequisites: [],
+    },
+  });
+  expect(r.message).toContain('Understand variables');
+});

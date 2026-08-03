@@ -5,7 +5,7 @@ services:
       POSTGRES_USER: tutor
       POSTGRES_PASSWORD: tutor
       POSTGRES_DB: tutor_mvp
-    ports: ["5432:5432"]
+    ports: ['5432:5432']
   redis:
     image: redis:7
-    ports: ["6379:6379"]
+    ports: ['6379:6379']

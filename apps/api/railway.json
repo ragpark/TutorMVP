@@ -1,1 +1,6 @@
-{"build":{"buildCommand":"pnpm install --frozen-lockfile && pnpm db:generate && pnpm turbo run build --filter=api..."},"deploy":{"startCommand":"pnpm db:deploy && pnpm db:seed && pnpm start"}}
+{
+  "build": {
+    "buildCommand": "pnpm install --frozen-lockfile && pnpm db:generate && pnpm turbo run build --filter=api..."
+  },
+  "deploy": { "startCommand": "pnpm db:deploy && pnpm db:seed && pnpm start" }
+}
