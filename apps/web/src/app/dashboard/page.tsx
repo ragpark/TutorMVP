@@ -1,6 +1,15 @@
 import Link from 'next/link';
-import { getJson, learnerId } from '../lib';
+import { getJson, getLearnerId } from '../lib';
 export default async function Dashboard() {
+  const learnerId = await getLearnerId();
+  if (!learnerId) {
+    return (
+      <div className="card">
+        <h1 className="text-3xl font-bold">Learner Dashboard</h1>
+        <p className="mt-2">No demo learner is seeded yet. Run `pnpm db:seed` and reload.</p>
+      </div>
+    );
+  }
   const mastery = (await getJson(`/learners/${learnerId}/mastery`)) ?? [];
   const rec = (await getJson(`/learners/${learnerId}/recommendations/current`)) ?? {
     actionType: 'TAKE_DIAGNOSTIC',

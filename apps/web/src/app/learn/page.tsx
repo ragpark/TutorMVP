@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { getJson, learnerId } from '../lib';
+import { getJson, getLearnerId } from '../lib';
 export default async function Learn() {
-  const rec = await getJson(`/learners/${learnerId}/recommendations/current`);
+  const learnerId = await getLearnerId();
+  const rec = learnerId ? await getJson(`/learners/${learnerId}/recommendations/current`) : null;
   const los = (await getJson('/learning-objectives')) ?? [];
   const lo = los.find((x: any) => x.id === rec?.targetLearningObjectiveId) || los[0];
   const prereqs = lo ? await getJson(`/learning-objectives/${lo.id}/prerequisites`) : [];

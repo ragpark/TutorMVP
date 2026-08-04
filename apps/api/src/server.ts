@@ -32,6 +32,9 @@ export async function buildApp() {
   );
   app.get('/learning-objectives/:id/prerequisites', async (req: any) => prereqLos(req.params.id));
   app.get('/learning-objectives/:id/concepts', async (req: any) => conceptsFor(req.params.id));
+  app.get('/learners/demo', async () =>
+    prisma.user.findFirst({ where: { email: 'learner@example.com' } }),
+  );
   app.get('/learners/:id/profile', async (req: any) =>
     prisma.learnerProfile.findUnique({
       where: { learnerId: req.params.id },
@@ -61,7 +64,16 @@ export async function buildApp() {
     saveRecommendation(req.params.id),
   );
   app.get('/assessment/diagnostic', () =>
-    prisma.assessmentItem.findMany({ take: 12, include: { learningObjective: true } }),
+    prisma.assessmentItem.findMany({
+      take: 12,
+      select: {
+        id: true,
+        type: true,
+        prompt: true,
+        choices: true,
+        learningObjective: { select: { id: true, code: true, title: true } },
+      },
+    }),
   );
   app.post('/assessment/attempts', async (req: any) => submitAttempt(req.body));
   app.get('/assessment/attempts/:id', async (req: any) =>
