@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutor</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Tutor</h1>
+    <div class="controls">
+      <label>Pupil
+        <select id="pupil" disabled><option>Loading pupils…</option></select>
+      </label>
+      <span id="subject" class="subject"></span>
+      <label class="switch" title="Send the pupil's answers back to the curriculum map">
+        <input type="checkbox" id="evidence" checked> Record answers
+      </label>
+      <button id="new" type="button">New conversation</button>
+    </div>
+  </header>
+  <main>
+    <p class="note">All pupils are synthetic. Each turn asks the curriculum map for a briefing before the tutor replies.</p>
+    <div id="log" aria-live="polite"></div>
+  </main>
+  <form id="form">
+    <textarea id="msg" rows="2" placeholder="Type as the pupil…" required></textarea>
+    <button id="send" type="submit">Send</button>
+  </form>
+  <script src="/static/app.js"></script>
+</body>
+</html>
