@@ -1,0 +1,12 @@
+# Deploys alongside the Curriculum Map. Set MAP_BASE_URL, ANTHROPIC_API_KEY, TUTOR_SECRET and MODEL as service
+# variables in Railway; never in this file. Turn logs and transcripts go to DATA_DIR (attach a volume at /srv/data
+# if you want them to survive redeploys).
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
