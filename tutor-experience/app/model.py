@@ -24,6 +24,10 @@ class ModelResult:
     raw: dict = field(default_factory=dict)
 
 
+class ModelUnavailable(Exception):
+    """The model could not be called: no credentials, network failure, or an API error."""
+
+
 class ModelCaller(Protocol):
     async def __call__(self, prompt: Prompt) -> ModelResult: ...
 
@@ -40,8 +44,13 @@ class ClaudeModel:
         if self._client is None:  # created on first use so the app can start (and serve the UI) without a key
             self._client = anthropic.AsyncAnthropic(api_key=self.settings.anthropic_api_key, timeout=self.timeout_s,
                                                     max_retries=1)
-        r = await self._client.messages.create(model=self.settings.model, max_tokens=self.settings.max_tokens,
-                                               system=prompt.system, messages=prompt.messages)
+        try:
+            r = await self._client.messages.create(model=self.settings.model, max_tokens=self.settings.max_tokens,
+                                                   system=prompt.system, messages=prompt.messages)
+        except anthropic.AnthropicError as e:
+            raise ModelUnavailable(type(e).__name__) from e
+        except TypeError as e:  # the SDK's "could not resolve authentication method"
+            raise ModelUnavailable("no Anthropic credentials (set ANTHROPIC_API_KEY)") from e
         text = "".join(b.text for b in r.content if b.type == "text")
         return ModelResult(text=text, model=r.model, stop_reason=r.stop_reason, raw=r.model_dump(mode="json"))
 

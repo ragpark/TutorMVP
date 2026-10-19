@@ -106,3 +106,14 @@ def test_control_conditions_never_write_evidence(settings, arm):
     client_for(with_(settings, evidence_from_harness=True), fm, FakeModel(ANSWERED)).post(
         "/webhook/tutor", json=body(arm, ctx))
     assert fm.requests == []
+
+
+def test_model_failure_is_a_clean_502(settings):
+    from app.model import ModelUnavailable
+
+    class Broken:
+        async def __call__(self, prompt):
+            raise ModelUnavailable("no Anthropic credentials (set ANTHROPIC_API_KEY)")
+
+    r = client_for(settings, FakeMap(), Broken()).post("/webhook/tutor", json=body())
+    assert r.status_code == 502 and "ANTHROPIC_API_KEY" in r.json()["error"]

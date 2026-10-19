@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-import anthropic
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
@@ -15,7 +14,7 @@ from pydantic import BaseModel, Field
 
 from .config import get_settings
 from .map_client import MapClient
-from .model import ClaudeModel
+from .model import ClaudeModel, ModelUnavailable
 from .turn import Deps, harness_turn, ui_turn
 
 log = logging.getLogger("tutor")
@@ -68,9 +67,9 @@ def create_app(deps: Deps | None = None) -> FastAPI:
             r = await ui_turn(request.app.state.deps, pupil_id=t.pupil, subject=t.subject, message=t.message,
                               conversation_id=t.conversation_id, record_evidence=t.record_evidence,
                               elapsed_s=t.elapsed_s)
-        except anthropic.AnthropicError as e:
-            log.exception("model call failed")
-            raise HTTPException(502, f"the tutor model is unavailable ({type(e).__name__})")
+        except ModelUnavailable as e:
+            log.warning("model call failed: %s", e)
+            raise HTTPException(502, f"the tutor model is unavailable ({e})")
         ev = r.evidence
         return {"turn_id": r.turn_id, "reply": r.reply, "briefing_ok": r.briefing_ok, "briefing_error": r.briefing_error,
                 "focus": r.focus,
@@ -99,9 +98,9 @@ def create_app(deps: Deps | None = None) -> FastAPI:
                 timeout=d.settings.webhook_budget_s)
         except asyncio.TimeoutError:
             return JSONResponse({"error": f"turn exceeded the {d.settings.webhook_budget_s:g} s budget"}, status_code=504)
-        except anthropic.AnthropicError as e:
-            log.exception("model call failed")
-            return JSONResponse({"error": f"model unavailable ({type(e).__name__})"}, status_code=502)
+        except ModelUnavailable as e:
+            log.warning("model call failed: %s", e)
+            return JSONResponse({"error": f"model unavailable ({e})"}, status_code=502)
         return {"reply": reply}
 
     return app
