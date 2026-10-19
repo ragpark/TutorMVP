@@ -23,18 +23,17 @@ STATIC = Path(__file__).resolve().parent.parent / "static"
 
 
 def create_app(deps: Deps | None = None) -> FastAPI:
+    if deps is None:
+        s = get_settings()
+        deps = Deps(settings=s, map=MapClient(s), model=ClaudeModel(s))
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        if deps is None:
-            s = get_settings()
-            app.state.deps = Deps(settings=s, map=MapClient(s), model=ClaudeModel(s))
-        else:
-            app.state.deps = deps
         yield
-        if deps is None:
-            await app.state.deps.map.aclose()
+        await deps.map.aclose()
 
     app = FastAPI(title="tutor-experience", version="0.1.0", lifespan=lifespan)
+    app.state.deps = deps
     app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
     @app.get("/", include_in_schema=False)
