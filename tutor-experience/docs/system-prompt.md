@@ -1,4 +1,7 @@
-# Proposed system prompt (draft for review)
+# System prompt
+
+Approved 2026-10-19. Implemented in `app/prompting.py`; after the briefing, every condition also gets the same hidden
+`<assessment>` instruction used for evidence write-back (see the README's design notes).
 
 `prompting.py` builds two things per turn:
 
