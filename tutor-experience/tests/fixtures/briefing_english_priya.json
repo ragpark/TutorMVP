@@ -1,0 +1,121 @@
+{
+  "mode": "with_h2",
+  "subject": "English: Macbeth",
+  "graph_version": "2026.1",
+  "request": {
+    "intent": "specific",
+    "message_topic": "Lady Macbeth: power, manipulation and decline",
+    "mentions": {"parts_of_text": [], "quotations": []}
+  },
+  "focus": {
+    "id": "cc:english/macbeth/ch-lady",
+    "label": "Lady Macbeth: power, manipulation and decline",
+    "chosen_because": {
+      "how": "the topic named in the pupil's message",
+      "intent": "specific",
+      "confidence": 0.9,
+      "provenance": "claude:claude-sonnet-5"
+    },
+    "crosswalk": [
+      {"scheme": "shared-layer", "id": "shared:ks4/english/macbeth/lady-macbeth", "match": "exactMatch"}
+    ]
+  },
+  "learner": {
+    "name": "Priya (synthetic)",
+    "status": "no evidence",
+    "mastery": null,
+    "active_misconceptions": [
+      {
+        "id": "mc:english/retelling",
+        "label": "Retells the plot instead of analysing",
+        "description": "Explains what happens (\"then Macbeth kills Duncan\") rather than how and why Shakespeare presents it."
+      }
+    ],
+    "other_active_misconceptions": [],
+    "prerequisites": [],
+    "overview": [
+      {"topic": "James I and the Divine Right of Kings", "status": "secure"},
+      {"topic": "Select and embed short quotations", "status": "secure"},
+      {"topic": "The Gunpowder Plot and fear of regicide", "status": "secure"},
+      {"topic": "Macbeth: from hero to tyrant", "status": "secure"},
+      {"topic": "Jacobean beliefs about witchcraft", "status": "secure"},
+      {"topic": "Analyse words and methods for their effect", "status": "developing"}
+    ],
+    "learning_edge": "Analyse words and methods for their effect",
+    "related_topics": [
+      {"topic": "Masculinity and gender", "status": "no evidence"},
+      {"topic": "Appearance and reality", "status": "no evidence"},
+      {"topic": "Sleep imagery", "status": "no evidence"},
+      {"topic": "Ambition", "status": "no evidence"},
+      {"topic": "Guilt and conscience", "status": "no evidence"},
+      {"topic": "Darkness and light imagery", "status": "no evidence"}
+    ]
+  },
+  "class": {
+    "id": "11E",
+    "teacher": "Ms Adeyemi (fictional)",
+    "current_week": 5,
+    "focus_taught": true,
+    "focus_week": 2,
+    "taught_so_far": [
+      "Wk1 James I and the Divine Right of Kings",
+      "Wk1 The Gunpowder Plot and fear of regicide",
+      "Wk1 Link context to meaning",
+      "Wk2 Ambition",
+      "Wk2 Darkness and light imagery",
+      "Wk2 Lady Macbeth: power, manipulation and decline",
+      "Wk3 Blood imagery",
+      "Wk3 Guilt and conscience",
+      "Wk3 Sleep imagery",
+      "Wk4 Dramatic irony",
+      "Wk4 Consider alternative interpretations",
+      "Wk4 Appearance and reality",
+      "Wk4 Fate and free will",
+      "Wk5 Move from the extract to the whole play",
+      "Wk5 Build a thesis-led argument"
+    ],
+    "not_yet_taught": ["Wk6 Power, kingship and tyranny"],
+    "preferred_method": {"id": "md:english/drama", "label": "Drama and hot-seating", "uses": 1},
+    "preferred_representation": null,
+    "text_studied_so_far": ["Act 1", "Act 2", "Act 3", "Act 4"],
+    "text_coming_up": ["Act 5 (week 6)"]
+  },
+  "materials": [
+    {
+      "ref": "mat:11e-w2-act1#1",
+      "heading": "Hot-seating Lady Macbeth",
+      "week": 2,
+      "excerpt": "Hot-seat Lady Macbeth after \"unsex me here\". Is she powerful, or is she already afraid of what she is asking for?",
+      "score": 0.744,
+      "why": "aligned to Lady Macbeth: power, manipulation and decline; uses Drama and hot-seating"
+    }
+  ],
+  "support_profile": null,
+  "how_to_support": {
+    "based_on": "0 recent questions",
+    "patterns_to_support": [],
+    "strengths": [],
+    "rule": "These are recent patterns, not fixed traits. Adapt how you help; never describe the pupil with a label."
+  },
+  "guidance": {
+    "diagnosis": "Matches this pupil's repeated error pattern: Retells the plot instead of analysing. Address it explicitly.",
+    "teach_with": {
+      "method": {"id": "md:english/drama", "label": "Drama and hot-seating", "uses": 1},
+      "representation": null
+    },
+    "avoid_methods": [],
+    "check_prerequisites_first": [],
+    "next_step": {
+      "action": "consolidate",
+      "concept": {"id": "cc:english/macbeth/ch-lady", "label": "Lady Macbeth: power, manipulation and decline"},
+      "why": "the pupil has not secured this yet, so do not move on",
+      "after_that": {"id": "cc:english/macbeth/th-ambition", "label": "Ambition"}
+    },
+    "scope_rule": "The class has studied Act 1, Act 2, Act 3, Act 4; still to come: Act 5 (week 6). Writing skills are practised throughout the course, and any character, theme or context topic can be discussed using the parts studied. Pupils may have read ahead: you can discuss later parts of the play, but say they are coming up in class and link back to what has been studied. Prefer quotations from the parts studied."
+  },
+  "key_quotations": [
+    {"text": "Come, you spirits / That tend on mortal thoughts, unsex me here", "speaker": "Lady Macbeth", "act": "1.5"},
+    {"text": "look like th' innocent flower, / But be the serpent under't", "speaker": "Lady Macbeth", "act": "1.5"}
+  ],
+  "approx_tokens": 1153
+}

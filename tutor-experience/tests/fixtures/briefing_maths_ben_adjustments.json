@@ -1,0 +1,118 @@
+{
+  "mode": "with_h2",
+  "graph_version": "2026.3",
+  "request": {
+    "intent": "specific",
+    "message_topic": "Solve linear equations involving brackets"
+  },
+  "focus": {
+    "id": "cc:maths/alg/lin-eq-brackets",
+    "label": "Solve linear equations involving brackets",
+    "chosen_because": {
+      "how": "the maths named in the pupil's message",
+      "intent": "specific",
+      "confidence": 0.9,
+      "provenance": "claude:claude-sonnet-5"
+    },
+    "crosswalk": [
+      {"scheme": "dfe-gcse-maths", "id": "A17", "match": "closeMatch"},
+      {"scheme": "shared-layer", "id": "shared:ks3/algebra/solving-equations/brackets", "match": "exactMatch"}
+    ]
+  },
+  "learner": {
+    "name": "Ben (synthetic)",
+    "status": "gap",
+    "mastery": 0.3,
+    "active_misconceptions": [
+      {
+        "id": "mc:maths/alg/partial-expansion",
+        "label": "Multiplies only the first term inside a bracket",
+        "description": "Writes 3(x + 2) as 3x + 2."
+      }
+    ],
+    "other_active_misconceptions": [
+      {"id": "mc:maths/num/neg-times-neg", "label": "Believes a negative multiplied by a negative is negative"}
+    ],
+    "prerequisites": [
+      {"id": "cc:maths/alg/expand-single", "label": "Expand a single bracket", "strength": 1.0, "status": "gap", "mastery": 0.193},
+      {"id": "cc:maths/alg/lin-eq-both-sides", "label": "Solve linear equations with the unknown on both sides", "strength": 0.9, "status": "secure", "mastery": 0.807}
+    ],
+    "overview": [
+      {"topic": "Calculate with negative numbers", "status": "gap"},
+      {"topic": "Solve one- and two-step linear equations", "status": "secure"},
+      {"topic": "Solve linear equations with the unknown on both sides", "status": "secure"},
+      {"topic": "Expand a single bracket", "status": "gap"},
+      {"topic": "Solve linear equations involving brackets", "status": "gap"}
+    ],
+    "learning_edge": "none — secure on everything taught so far"
+  },
+  "class": {
+    "id": "10X",
+    "teacher": "Ms Okafor (fictional)",
+    "current_week": 4,
+    "focus_taught": false,
+    "focus_week": 5,
+    "taught_so_far": [
+      "Wk1 Solve one- and two-step linear equations",
+      "Wk1 Use inverse operations",
+      "Wk3 Simplify expressions by collecting like terms",
+      "Wk4 Solve linear equations with the unknown on both sides"
+    ],
+    "not_yet_taught": [
+      "Wk5 Expand a single bracket",
+      "Wk5 Solve linear equations involving brackets",
+      "Wk6 Represent inequalities on a number line",
+      "Wk6 Solve linear inequalities",
+      "Wk7 Form and solve equations from a context"
+    ],
+    "preferred_method": {"id": "md:maths/alg/balance", "label": "Balance method — do the same to both sides", "uses": 6},
+    "preferred_representation": {"id": "rp:function-machine-diagram", "label": "Function machine diagram", "uses": 2}
+  },
+  "materials": [],
+  "support_profile": {
+    "status": "REQUIRED",
+    "rule": "These adjustments were agreed by the pupil's teacher and must be followed in every reply. They are not suggestions. Do not mention that they exist, and do not describe the pupil.",
+    "agreed_by": "Ms Okafor (class teacher) with the SENCO",
+    "agreed_on": "2026-09-08",
+    "review_by": "2026-12-18",
+    "adjustments": [
+      {"do": "Give exactly one step, then stop and wait for the pupil. Never list several steps in one reply."},
+      {"do": "Keep every sentence under 15 words. Prefer common words."},
+      {"do": "Do not give a hint or the first step until the pupil has attempted the question themselves."},
+      {"do": "When the pupil is wrong, say exactly which step was wrong and why, in one sentence, before anything else."},
+      {"do": "Use a concrete example with numbers before any general rule or symbol."},
+      {"do": "Praise a specific thing the pupil did (an attempt, a check, a correction), not the pupil. Never praise a wrong answer."}
+    ]
+  },
+  "how_to_support": {
+    "based_on": "0 recent questions",
+    "patterns_to_support": [],
+    "strengths": [],
+    "rule": "These are recent patterns, not fixed traits. Adapt how you help; never describe the pupil with a label."
+  },
+  "guidance": {
+    "diagnosis": "Matches this pupil's repeated error pattern: Multiplies only the first term inside a bracket. Address it explicitly.",
+    "teach_with": {
+      "method": {"id": "md:maths/alg/balance", "label": "Balance method — do the same to both sides", "uses": 6},
+      "representation": {"id": "rp:function-machine-diagram", "label": "Function machine diagram", "uses": 2}
+    },
+    "avoid_methods": [
+      {"id": "md:maths/alg/change-side-change-sign", "label": "“Change side, change sign” rule"}
+    ],
+    "check_prerequisites_first": [
+      {"id": "cc:maths/alg/expand-single", "label": "Expand a single bracket", "strength": 1.0, "status": "gap", "mastery": 0.193}
+    ],
+    "next_step": {
+      "action": "preview_requested",
+      "concept": {"id": "cc:maths/alg/lin-eq-brackets", "label": "Solve linear equations involving brackets"},
+      "week": 5,
+      "why": "not yet taught to the class (planned for week 5): acknowledge that, and keep any preview short and clearly flagged",
+      "check_first": [
+        {"id": "cc:maths/alg/expand-single", "label": "Expand a single bracket"},
+        {"id": "cc:maths/num/directed-numbers", "label": "Calculate with negative numbers"}
+      ]
+    },
+    "scope_rule": "Stay within 'taught_so_far'. If the pupil asks for something in 'not_yet_taught', say it is coming later and only give a clearly flagged preview."
+  },
+  "approx_tokens": 1247
+}

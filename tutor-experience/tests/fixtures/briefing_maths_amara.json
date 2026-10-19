@@ -1,0 +1,121 @@
+{
+  "mode": "with_h2",
+  "graph_version": "2026.3",
+  "request": {
+    "intent": "specific",
+    "message_topic": "Solve linear equations with the unknown on both sides"
+  },
+  "focus": {
+    "id": "cc:maths/alg/lin-eq-both-sides",
+    "label": "Solve linear equations with the unknown on both sides",
+    "chosen_because": {
+      "how": "the maths named in the pupil's message",
+      "intent": "specific",
+      "confidence": 0.95,
+      "provenance": "claude:claude-sonnet-5"
+    },
+    "crosswalk": [
+      {"scheme": "dfe-gcse-maths", "id": "A17", "match": "closeMatch"},
+      {"scheme": "shared-layer", "id": "shared:ks3/algebra/solving-equations/unknown-both-sides", "match": "exactMatch"}
+    ]
+  },
+  "learner": {
+    "name": "Amara (synthetic)",
+    "status": "gap",
+    "mastery": 0.147,
+    "active_misconceptions": [
+      {
+        "id": "mc:maths/alg/sign-transfer",
+        "label": "Sign error when moving a term across the equals sign",
+        "description": "Moves a term to the other side without changing the operation (e.g. 5x + 3 = 2x + 12 → 7x = 15)."
+      }
+    ],
+    "other_active_misconceptions": [],
+    "prerequisites": [
+      {"id": "cc:maths/alg/lin-eq-simple", "label": "Solve one- and two-step linear equations", "strength": 1.0, "status": "secure", "mastery": 0.869},
+      {"id": "cc:maths/alg/collect-like-terms", "label": "Simplify expressions by collecting like terms", "strength": 0.8, "status": "secure", "mastery": 0.7},
+      {"id": "cc:maths/num/directed-numbers", "label": "Calculate with negative numbers", "strength": 0.7, "status": "no evidence", "mastery": null}
+    ],
+    "overview": [
+      {"topic": "Use inverse operations", "status": "secure"},
+      {"topic": "Solve one- and two-step linear equations", "status": "secure"},
+      {"topic": "Simplify expressions by collecting like terms", "status": "secure"},
+      {"topic": "Solve linear equations with the unknown on both sides", "status": "gap"}
+    ],
+    "learning_edge": "Solve linear equations with the unknown on both sides"
+  },
+  "class": {
+    "id": "10X",
+    "teacher": "Ms Okafor (fictional)",
+    "current_week": 4,
+    "focus_taught": true,
+    "focus_week": 4,
+    "taught_so_far": [
+      "Wk1 Solve one- and two-step linear equations",
+      "Wk1 Use inverse operations",
+      "Wk3 Simplify expressions by collecting like terms",
+      "Wk4 Solve linear equations with the unknown on both sides"
+    ],
+    "not_yet_taught": [
+      "Wk5 Expand a single bracket",
+      "Wk5 Solve linear equations involving brackets",
+      "Wk6 Represent inequalities on a number line",
+      "Wk6 Solve linear inequalities",
+      "Wk7 Form and solve equations from a context"
+    ],
+    "preferred_method": {"id": "md:maths/alg/balance", "label": "Balance method — do the same to both sides", "uses": 4},
+    "preferred_representation": {"id": "rp:bar-model", "label": "Bar model", "uses": 1}
+  },
+  "materials": [
+    {
+      "ref": "mat:10x-w4-both-sides#1",
+      "heading": "Common mistake: why the sign changes",
+      "week": 4,
+      "excerpt": "Some pupils write 7x = 15 because they move the 2x across the equals sign without changing it — a sign error when moving a term.\nWe never 'move' a term: we do the same to both sides to keep it balanced, so the 2x is subtracted from both sides.",
+      "score": 1.711,
+      "why": "aligned to Solve linear equations with the unknown on both sides; uses Balance method — do the same to both sides; addresses Sign error when moving a term across the equals sign"
+    },
+    {
+      "ref": "mat:10x-w4-both-sides#2",
+      "heading": "Practice: unknowns on both sides",
+      "week": 4,
+      "excerpt": "Solve 7x − 2 = 3x + 10 and 4x + 5 = x − 7. Check each answer by substituting back — both sides should have the same value.",
+      "score": 0.836,
+      "why": "aligned to Solve linear equations with the unknown on both sides; uses Balance method — do the same to both sides"
+    },
+    {
+      "ref": "mat:10x-w4-both-sides#0",
+      "heading": "Worked example: x on both sides",
+      "week": 4,
+      "excerpt": "Solve 5x + 3 = 2x + 12. Draw the bar model for each side of the balance.\nSubtract 2x from both sides: 3x + 3 = 12. Subtract 3 from both sides: 3x = 9, so x = 3.",
+      "score": 0.804,
+      "why": "aligned to Solve linear equations with the unknown on both sides; uses Balance method — do the same to both sides"
+    }
+  ],
+  "support_profile": null,
+  "how_to_support": {
+    "based_on": "0 recent questions",
+    "patterns_to_support": [],
+    "strengths": [],
+    "rule": "These are recent patterns, not fixed traits. Adapt how you help; never describe the pupil with a label."
+  },
+  "guidance": {
+    "diagnosis": "Matches this pupil's repeated error pattern: Sign error when moving a term across the equals sign. Address it explicitly.",
+    "teach_with": {
+      "method": {"id": "md:maths/alg/balance", "label": "Balance method — do the same to both sides", "uses": 4},
+      "representation": {"id": "rp:bar-model", "label": "Bar model", "uses": 1}
+    },
+    "avoid_methods": [
+      {"id": "md:maths/alg/change-side-change-sign", "label": "“Change side, change sign” rule"}
+    ],
+    "check_prerequisites_first": [],
+    "next_step": {
+      "action": "consolidate",
+      "concept": {"id": "cc:maths/alg/lin-eq-both-sides", "label": "Solve linear equations with the unknown on both sides"},
+      "why": "the pupil has not secured this yet, so do not move on",
+      "after_that": {"id": "cc:maths/alg/lin-eq-brackets", "label": "Solve linear equations involving brackets"}
+    },
+    "scope_rule": "Stay within 'taught_so_far'. If the pupil asks for something in 'not_yet_taught', say it is coming later and only give a clearly flagged preview."
+  },
+  "approx_tokens": 1306
+}
