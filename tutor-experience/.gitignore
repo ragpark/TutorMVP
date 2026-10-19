@@ -16,6 +16,7 @@ build/
 !.env.example
 
 # Runtime output: turn logs and transcripts stay local
+data/
 logs/
 transcripts/
 
