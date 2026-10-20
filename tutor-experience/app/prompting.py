@@ -36,6 +36,22 @@ Order of authority (highest first)
 4. Guidance and teaching method.
 5. Recent patterns ("how to support"), which are advisory only."""
 
+WIDGET_RULES = """Optional interactive widgets
+The pupil's screen can show up to 3 small interactive widgets under your reply. Your reply text must make complete sense without them: anything a widget shows (a diagram, the steps, the hint) must also be described or asked in your words. Widgets are part of your reply, so agreed adjustments, the scope rule and the class's method apply to them too (for example, a "steps" widget has one step if the pupil must get one step at a time, and there are no "hints" before the pupil has attempted the question if that is required). Use a widget only when it genuinely helps; most replies need none or one.
+If you use any, add after your reply, on its own line, exactly one block:
+<widgets>[ ... ]</widgets>
+containing a JSON array of objects from this list only:
+- {{"type": "answer", "prompt": "x =", "choices": []}}  a box for the pupil's answer to your question (choices optional, at most 5)
+- {{"type": "hints", "hints": ["smallest hint", "a bigger hint"]}}  revealed one at a time when the pupil asks
+- {{"type": "steps", "title": "...", "steps": ["...", "..."]}}  a worked example revealed one step at a time
+- {{"type": "confidence", "prompt": "How sure are you?"}}  the pupil rates how sure they are
+- {{"type": "balance", "left": "5x + 3", "right": "2x + 12", "operation": "subtract 2x from both sides", "result_left": "3x + 3", "result_right": "12"}}  maths: scales for the balance method (result optional)
+- {{"type": "bar_model", "rows": [{{"label": "5x + 3", "segments": [{{"label": "x", "size": 1}}, {{"label": "3", "size": 0.6}}]}}], "caption": "..."}}  maths: bar model
+- {{"type": "function_machine", "input": "x", "operations": ["× 3", "+ 2"], "output": "17"}}  maths: function machine
+- {{"type": "number_line", "min": -5, "max": 5, "marks": [{{"value": -2, "label": "-2"}}], "caption": "..."}}  maths: number line
+- {{"type": "quote", "text": "...", "speaker": "...", "act": "1.5", "focus_words": ["unsex"], "question": "..."}}  English: a quotation to look at closely
+Prefer the class's own representation when it is listed."""
+
 ASSESSMENT_RULES = """After your reply, on a new line, add exactly one assessment block. The pupil never sees it.
 <assessment>{{"answered": <true if the pupil's latest message gives an answer to a question (yours or one they are working on), else false>, "question": "<the question they answered, or empty>", "answer": "<their answer, verbatim, or empty>", "correct": <true, false, or null if it cannot be judged>, "score": <0 to 1, how much of the question they got right, or null>, "misconception_id": <one id from the list below if the wrong answer clearly shows it, else null>}}</assessment>
 Known misconceptions you may name: {misconceptions}"""
@@ -197,6 +213,7 @@ def build_prompt(subject: str, condition: str, context: dict | None, message: st
         parts.append(f"You are tutoring {first_name(p.get('name'))}" + (f", Year {p['year']}." if p.get("year") else "."))
     else:
         parts.append(UNAVAILABLE_NOTE)
+    parts.append(WIDGET_RULES.format())
     parts.append(ASSESSMENT_RULES.format(
         misconceptions="; ".join(f"{m['id']} ({m['label']})" for m in mcs) if mcs else "none"))
     messages = [{"role": m["role"], "content": m["content"]} for m in (history or []) if m.get("content")]

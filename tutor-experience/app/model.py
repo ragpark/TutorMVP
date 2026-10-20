@@ -8,10 +8,11 @@ from typing import Protocol
 
 import anthropic
 
+from . import widgets as W
 from .config import Settings
 from .prompting import Prompt
 
-ASSESSMENT_RE = re.compile(r"<assessment>(.*?)</assessment>", re.DOTALL)
+BLOCK_RE = {tag: re.compile(rf"<{tag}>(.*?)</{tag}>", re.DOTALL) for tag in ("assessment", "widgets")}
 FALLBACK_REPLY = "Sorry, I lost my train of thought there. Could you send that again?"
 REFUSAL_REPLY = "I can't help with that one. Shall we get back to your work?"
 
@@ -60,21 +61,28 @@ class TurnOutput:
     reply: str
     assessment: dict | None
     log_path: Path
+    widgets: list[dict] = field(default_factory=list)
 
 
-def split_reply(text: str) -> tuple[str, dict | None]:
-    """Separate the pupil-facing reply from the hidden assessment block. A malformed block is dropped, never shown."""
-    assessment = None
-    m = ASSESSMENT_RE.search(text)
-    if m:
-        try:
-            parsed = json.loads(m.group(1).strip())
-            assessment = parsed if isinstance(parsed, dict) else None
-        except json.JSONDecodeError:
-            assessment = None
-    reply = ASSESSMENT_RE.sub("", text)
-    reply = re.sub(r"</?assessment>.*", "", reply, flags=re.DOTALL)  # an unclosed block
-    return reply.strip(), assessment
+def _block(text: str, tag: str):
+    m = BLOCK_RE[tag].search(text)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1).strip())
+    except json.JSONDecodeError:
+        return None
+
+
+def split_reply(text: str) -> tuple[str, dict | None, list[dict]]:
+    """Separate the pupil-facing reply from the hidden assessment and widgets blocks. Malformed blocks are dropped,
+    never shown."""
+    assessment = _block(text, "assessment")
+    reply = text
+    for rx in BLOCK_RE.values():
+        reply = rx.sub("", reply)
+    reply = re.sub(r"</?(assessment|widgets)>.*", "", reply, flags=re.DOTALL)  # an unclosed block
+    return reply.strip(), assessment if isinstance(assessment, dict) else None, W.clean(_block(text, "widgets"))
 
 
 def log_dir(settings: Settings) -> Path:
@@ -108,13 +116,13 @@ async def run_model(caller: ModelCaller, prompt: Prompt, settings: Settings, tur
         record["error"] = f"{type(e).__name__}: {e}"
         write_log(path, record)
         raise
-    reply, assessment = split_reply(result.text)
+    reply, assessment, widgets = split_reply(result.text)
     if result.stop_reason == "refusal":
-        reply, assessment = REFUSAL_REPLY, None
+        reply, assessment, widgets = REFUSAL_REPLY, None, []
     if not reply:
         reply = FALLBACK_REPLY
     record.update(response={"text": result.text, "model": result.model, "stop_reason": result.stop_reason,
                             "raw": result.raw},
-                  reply=reply, assessment=assessment)
+                  reply=reply, assessment=assessment, widgets=widgets)
     write_log(path, record)
-    return TurnOutput(reply=reply, assessment=assessment, log_path=path)
+    return TurnOutput(reply=reply, assessment=assessment, log_path=path, widgets=widgets)
