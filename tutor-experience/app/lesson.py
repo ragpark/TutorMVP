@@ -14,6 +14,8 @@ def lesson_view(b: dict | None) -> dict | None:
         return None
     focus, cls, g = b.get("focus") or {}, b.get("class") or {}, b.get("guidance") or {}
     tw, ns = g.get("teach_with") or {}, g.get("next_step") or {}
+    next_label = ((ns.get("after_that") or {}).get("label") if ns.get("action") == "consolidate"
+                  else (ns.get("concept") or {}).get("label"))
     scheme = []
     for status, items in (("taught", cls.get("taught_so_far") or []), ("coming", cls.get("not_yet_taught") or [])):
         for it in items:
@@ -28,8 +30,7 @@ def lesson_view(b: dict | None) -> dict | None:
         "class": cls.get("id"),
         "method": (tw.get("method") or {}).get("label"),
         "representation": (tw.get("representation") or {}).get("label"),
-        "next": ((ns.get("after_that") or {}).get("label") if ns.get("action") == "consolidate"
-                 else (ns.get("concept") or {}).get("label")),
+        "next": next_label if next_label != focus.get("label") else None,
         "scheme": scheme,
         "text_studied": cls.get("text_studied_so_far"),
         "text_coming": cls.get("text_coming_up"),

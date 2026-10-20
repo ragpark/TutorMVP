@@ -91,7 +91,7 @@ def test_lesson_view_shows_class_facts_not_pupil_labels():
     v = lesson_view(load("briefing_maths_ben_adjustments.json"))
     assert v["topic_taught"] is False and v["topic_week"] == 5
     assert v["method"] == "Balance method — do the same to both sides"
-    assert v["next"] == "Solve linear equations involving brackets"
+    assert v["next"] is None  # the next step is the previewed focus itself, so nothing new to show
     assert {"week": 5, "label": "Solve linear equations involving brackets", "status": "coming", "focus": True} in v["scheme"]
     flat = json.dumps(v)
     for leak in ("gap", "secure", "mastery", "misconception", "adjust"):
