@@ -23,7 +23,9 @@ pupil message ─▶ briefing.py ─▶ prompting.py ─▶ model.py ─▶ evid
 | `app/briefing.py` | Fetch the briefing for (pupil, message). If the map can't be reached, the turn runs with no context and the reply says so. Nothing is invented. |
 | `app/prompting.py` | Turn the briefing into the system prompt (see [`docs/system-prompt.md`](docs/system-prompt.md)). Agreed adjustments (`support_profile`) come first and are REQUIRED; `how_to_support` is advisory. |
 | `app/model.py` | One Claude call per turn. The full prompt and response are written to `data/turns/<date>/<turn_id>.json`. |
-| `app/evidence.py` | When the pupil answered a question, write it back as `activity` + `score` with `source: "tutor-experience"`. |
+| `app/evidence.py` | When the pupil answered a question, write it back as `activity` + `score` with `source: "tutor-experience"`, plus process events (attempt, hints opened, confidence). |
+| `app/widgets.py` | Validate the optional interactive widgets the model attaches to a reply (UI only). |
+| `app/lesson.py` | The lesson panel's view of the briefing: topic, scheme of work, method, next step. |
 | `app/turn.py` | The two entry points: UI turns and harness turns. |
 | `app/main.py` | FastAPI routes: `/` (chat UI), `/api/pupils`, `/api/turn`, `/webhook/tutor`, `/health`. |
 
@@ -52,9 +54,23 @@ make run                    # http://localhost:8000
 make test                   # no network: the map and the model are both mocked
 ```
 
-Pick a pupil, then type as them. Each tutor reply shows which topic the map's briefing focused on and whether the
-answer was recorded. The **Record answers** switch (on by default) controls write-back. Ben and Farah are the pupils
-with agreed adjustments.
+Pick a pupil, then type (or speak) as them. The interface is built for guided learning:
+
+- **Starters and quick actions** ("I'm stuck", "Show me an example", "Explain it another way") so a pupil always has a
+  next move.
+- **Interactive widgets** under a reply when the tutor chooses them: an answer box or choices, a hint ladder revealed
+  one hint at a time, a worked example revealed step by step, a confidence check, and pictures for the class's
+  representation (balance scales that you can "do to both sides", bar model, function machine, number line, and a
+  quotation card with the key words highlighted for Macbeth).
+- **A lesson panel** from the briefing: this turn's topic, whether it has been taught yet or is coming up, the class's
+  method, what comes next, and the scheme of work with the current topic highlighted. It shows class-level facts only,
+  never labels about the pupil.
+- **Progress today**: one dot per answer the tutor judged (right, partly right, not yet).
+- **Read aloud** for every reply and quotation, and **voice input** where the browser supports it (British English).
+- **Tester view** (off by default) shows the full briefing the map sent for the turn.
+
+The **Record answers** switch (on by default) controls write-back. Hints the pupil opens and the confidence they report
+go to the map as process events with their next answer. Ben and Farah are the pupils with agreed adjustments.
 
 | Variable | Meaning |
 | --- | --- |
@@ -99,6 +115,12 @@ make ping TUTOR_ID=<id printed by register>
   agreed adjustments, scope, what the pupil asked, how to teach it, the pupil, quotations, materials, then advisory
   patterns. IDs, mastery numbers, crosswalks, retrieval scores and who agreed the adjustments are left out (they are
   still in the turn log).
+- **Widgets: one tutor, text-first.** The same prompt (with the same widget instructions) goes to every condition and
+  to the UI. The model may add a hidden `<widgets>` block from a fixed vocabulary; `app/widgets.py` validates it
+  (unknown types and fields dropped, strings clipped, at most three). The UI renders it; the webhook strips it, so the
+  harness scores the text alone. The prompt therefore requires the reply text to make complete sense without widgets,
+  and says agreed adjustments, the scope rule and the class's method apply to widgets too. The browser builds every
+  widget with DOM APIs, never `innerHTML`.
 - **The `raw` pack is passed verbatim.** Reorganising it would test our renderer rather than the map's organisation.
 - **The same fixed rules apply in every condition**, including the hidden assessment instruction, so conditions differ
   only in the context they carry.
@@ -124,6 +146,11 @@ make ping TUTOR_ID=<id printed by register>
 ### Left open deliberately
 
 - **Streaming replies** in the UI. Turns are short, and a single JSON response keeps the webhook and UI paths identical.
+- **Maths typesetting** (KaTeX or similar). Replies are plain text so they read the same to the harness; the widgets
+  carry the visual load.
+- **Checking widgets against agreed adjustments in code** (for example, dropping a multi-step "steps" widget when "one
+  step at a time" is required). For now the prompt carries that rule; the turn logs record every widget so it can be
+  audited.
 - **Pupil-facing safeguarding and moderation** beyond the model's own behaviour. This needs a policy decision before
   any real pupil sees it.
 - **Multi-turn harness scenarios.** The harness sends single turns with no history, so the webhook keeps none.

@@ -1,7 +1,7 @@
 # System prompt
 
-Approved 2026-10-19. Implemented in `app/prompting.py`; after the briefing, every condition also gets the same hidden
-`<assessment>` instruction used for evidence write-back (see the README's design notes).
+Approved 2026-10-19. Implemented in `app/prompting.py`; after the briefing, every condition also gets the same optional
+`<widgets>` instruction (UI only; stripped from webhook replies) and the same hidden `<assessment>` instruction used for evidence write-back (see the README's design notes).
 
 `prompting.py` builds two things per turn:
 
