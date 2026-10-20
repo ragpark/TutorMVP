@@ -60,19 +60,20 @@ def create_app(deps: Deps | None = None) -> FastAPI:
         conversation_id: str = Field(pattern=r"^[A-Za-z0-9_-]{8,64}$")
         record_evidence: bool = True
         elapsed_s: float | None = None
+        events: list[dict] = Field(default_factory=list, max_length=20)
 
     @app.post("/api/turn")
     async def turn(t: TurnIn, request: Request):
         try:
             r = await ui_turn(request.app.state.deps, pupil_id=t.pupil, subject=t.subject, message=t.message,
                               conversation_id=t.conversation_id, record_evidence=t.record_evidence,
-                              elapsed_s=t.elapsed_s)
+                              elapsed_s=t.elapsed_s, events=t.events)
         except ModelUnavailable as e:
             log.warning("model call failed: %s", e)
             raise HTTPException(502, f"the tutor model is unavailable ({e})")
         ev = r.evidence
         return {"turn_id": r.turn_id, "reply": r.reply, "briefing_ok": r.briefing_ok, "briefing_error": r.briefing_error,
-                "focus": r.focus,
+                "focus": r.focus, "widgets": r.widgets, "lesson": r.lesson, "briefing": r.briefing,
                 "evidence": None if ev is None else {"ok": ev["result"].get("ok"), "score": ev["payload"]["score"],
                                                      "activity": ev["payload"]["activity"]}}
 

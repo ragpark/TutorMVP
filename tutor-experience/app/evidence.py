@@ -10,6 +10,27 @@ import httpx
 from .map_client import MapClient
 
 SOURCE = "tutor-experience"
+# Events the UI may report from the pupil's side of a turn (the map's process vocabulary, minus attempt, which we
+# build from the assessment, and affect, which the map never stores).
+CLIENT_EVENTS = ("hint_requested", "answer_revised", "checked", "confidence", "plan_stated", "abandoned")
+
+
+def client_process(events) -> list[dict]:
+    """Validated process events from the UI, in order, each with t in whole seconds since the tutor's last reply."""
+    out = []
+    for e in (events if isinstance(events, list) else [])[:20]:
+        if not isinstance(e, dict) or e.get("type") not in CLIENT_EVENTS:
+            continue
+        t = e.get("t")
+        ok_t = isinstance(t, (int, float)) and not isinstance(t, bool) and 0 <= t < 86400
+        ev = {"type": e["type"], "t": int(t) if ok_t else 0}
+        if e["type"] == "confidence":
+            r = e.get("rating")
+            if not (isinstance(r, int) and not isinstance(r, bool) and 1 <= r <= 4):
+                continue
+            ev["rating"] = r
+        out.append(ev)
+    return out
 
 
 def should_record(*, from_harness: bool, condition: str, ui_switch: bool, harness_flag: bool) -> bool:
@@ -25,7 +46,8 @@ def _clip(s: str, n: int) -> str:
 
 
 def build_payload(pupil_id: str, assessment: dict | None, briefing: dict | None,
-                  allowed_misconceptions: list[str] | None = None, elapsed_s: float | None = None) -> dict | None:
+                  allowed_misconceptions: list[str] | None = None, elapsed_s: float | None = None,
+                  events: list[dict] | None = None) -> dict | None:
     """The POST /api/evidence body, or None when there is nothing to record."""
     if not assessment or assessment.get("answered") is not True:
         return None
@@ -57,7 +79,7 @@ def build_payload(pupil_id: str, assessment: dict | None, briefing: dict | None,
     attempt = {"type": "attempt", "answer": _clip(answer, 200), "correct": score >= 1.0}
     if elapsed_s is not None and elapsed_s >= 0:
         attempt["t"] = int(round(elapsed_s))
-    payload["process"] = [attempt]
+    payload["process"] = sorted(client_process(events) + [attempt], key=lambda e: e.get("t", 10**9))  # untimed attempt goes last
     return payload
 
 

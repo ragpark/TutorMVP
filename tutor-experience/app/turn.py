@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from . import evidence, transcripts
 from .briefing import fetch_briefing
 from .config import Settings
+from .lesson import lesson_view
 from .map_client import MapClient
 from .model import ModelCaller, append_to_log, run_model
 from .prompting import build_prompt
@@ -32,10 +33,14 @@ class UITurnResult:
     briefing_error: str | None
     focus: str | None
     evidence: dict | None
+    widgets: list[dict]
+    lesson: dict | None
+    briefing: dict | None
 
 
 async def ui_turn(deps: Deps, *, pupil_id: str, subject: str, message: str, conversation_id: str,
-                  record_evidence: bool = True, elapsed_s: float | None = None) -> UITurnResult:
+                  record_evidence: bool = True, elapsed_s: float | None = None,
+                  events: list[dict] | None = None) -> UITurnResult:
     turn_id = "ui-" + uuid.uuid4().hex[:12]
     hist = transcripts.history(deps.settings, conversation_id)
     br = await fetch_briefing(deps.map, pupil_id, message)
@@ -49,18 +54,21 @@ async def ui_turn(deps: Deps, *, pupil_id: str, subject: str, message: str, conv
     ev = None
     if br.ok and evidence.should_record(from_harness=False, condition=condition, ui_switch=record_evidence,
                                         harness_flag=deps.settings.evidence_from_harness):
-        payload = evidence.build_payload(pupil_id, out.assessment, br.briefing, prompt.misconception_ids, elapsed_s)
+        payload = evidence.build_payload(pupil_id, out.assessment, br.briefing, prompt.misconception_ids, elapsed_s,
+                                         events)
         if payload:
             ev = {"payload": payload, "result": await evidence.record(deps.map, payload)}
-    append_to_log(out.log_path, final_reply=reply, evidence=ev)
+    append_to_log(out.log_path, final_reply=reply, evidence=ev, client_events=events or [])
     transcripts.append(deps.settings, conversation_id, pupil=pupil_id, turn_id=turn_id, user=message, assistant=reply)
     return UITurnResult(turn_id=turn_id, reply=reply, briefing_ok=br.ok, briefing_error=br.error,
-                        focus=((br.briefing or {}).get("focus") or {}).get("label"), evidence=ev)
+                        focus=((br.briefing or {}).get("focus") or {}).get("label"), evidence=ev,
+                        widgets=out.widgets, lesson=lesson_view(br.briefing), briefing=br.briefing)
 
 
 async def harness_turn(deps: Deps, *, turn_id: str, subject: str, arm: str, pupil: str, message: str,
                        context: dict) -> str:
-    """One blind evaluation turn. Context comes from the harness; the map is touched only for an allowed write-back."""
+    """One blind evaluation turn. Context comes from the harness; the map is touched only for an allowed write-back.
+    Only the text reply is returned: widgets are a UI affordance and are never part of what the harness scores."""
     prompt = build_prompt(subject, arm, context, message)
     out = await run_model(deps.model, prompt, deps.settings, f"harness-{turn_id}",
                           {"route": "webhook", "pupil": pupil, "subject": subject, "context": context})
