@@ -47,8 +47,9 @@ def _clip(s: str, n: int) -> str:
 
 def build_payload(pupil_id: str, assessment: dict | None, briefing: dict | None,
                   allowed_misconceptions: list[str] | None = None, elapsed_s: float | None = None,
-                  events: list[dict] | None = None) -> dict | None:
-    """The POST /api/evidence body, or None when there is nothing to record."""
+                  events: list[dict] | None = None, topic: str | None = None) -> dict | None:
+    """The POST /api/evidence body, or None when there is nothing to record. `topic` names what the answer was about
+    when it was not the briefing's focus (a warm-up question on an earlier topic)."""
     if not assessment or assessment.get("answered") is not True:
         return None
     answer = str(assessment.get("answer") or "").strip()
@@ -63,17 +64,19 @@ def build_payload(pupil_id: str, assessment: dict | None, briefing: dict | None,
     score = max(0.0, min(1.0, float(score)))
 
     focus = ((briefing or {}).get("focus") or {}).get("label")
+    off_focus = bool(topic and topic != focus)
+    label = topic or focus
     question = _clip(assessment.get("question") or "", 160)
     title = "Tutor chat"
-    if focus:
-        title += f" — {focus}"
+    if label:
+        title += f" — {label}"
     if question:
         title += f": {question}"
     payload = {"learner": pupil_id, "source": SOURCE, "activity": title, "score": round(score, 3),
                "response": _clip(answer, 400)}
 
     mc = assessment.get("misconception_id")
-    if mc and score < 1.0 and mc in (allowed_misconceptions or []):
+    if mc and score < 1.0 and not off_focus and mc in (allowed_misconceptions or []):
         payload["misconception"] = mc
 
     attempt = {"type": "attempt", "answer": _clip(answer, 200), "correct": score >= 1.0}

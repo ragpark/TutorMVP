@@ -197,7 +197,8 @@ def render_briefing(b: dict) -> str:
 
 
 def build_prompt(subject: str, condition: str, context: dict | None, message: str,
-                 history: list[dict] | None = None) -> Prompt:
+                 history: list[dict] | None = None, session_block: str | None = None) -> Prompt:
+    """session_block: the UI conversation's plan (app/session.py). Harness turns have no conversation and pass none."""
     if condition not in CONDITIONS:
         raise ValueError(f"unknown condition {condition!r}")
     context = context or {}
@@ -213,6 +214,8 @@ def build_prompt(subject: str, condition: str, context: dict | None, message: st
         parts.append(f"You are tutoring {first_name(p.get('name'))}" + (f", Year {p['year']}." if p.get("year") else "."))
     else:
         parts.append(UNAVAILABLE_NOTE)
+    if session_block:
+        parts.append(session_block)
     parts.append(WIDGET_RULES.format())
     parts.append(ASSESSMENT_RULES.format(
         misconceptions="; ".join(f"{m['id']} ({m['label']})" for m in mcs) if mcs else "none"))
