@@ -6,28 +6,74 @@
   <title>Tutor</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
-  <header>
-    <h1>Tutor</h1>
-    <div class="controls">
-      <label>Pupil
-        <select id="pupil" disabled><option>Loading pupils…</option></select>
+<body data-subject="maths">
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true">✦</span> Tutor</div>
+    <div class="who">
+      <label class="sr" for="pupil">Pupil</label>
+      <select id="pupil" disabled><option>Loading pupils…</option></select>
+      <span id="subject" class="chip"></span>
+    </div>
+    <div class="tools">
+      <button id="lessonToggle" class="ghost only-narrow" type="button" aria-expanded="false" aria-controls="lesson">Lesson</button>
+      <label class="toggle" title="Send the pupil's answers back to the curriculum map">
+        <input type="checkbox" id="evidence" checked><span>Record<span class="long"> answers</span></span>
       </label>
-      <span id="subject" class="subject"></span>
-      <label class="switch" title="Send the pupil's answers back to the curriculum map">
-        <input type="checkbox" id="evidence" checked> Record answers
+      <label class="toggle" title="Show the briefing the map sent for each turn">
+        <input type="checkbox" id="tester"><span>Tester<span class="long"> view</span></span>
       </label>
-      <button id="new" type="button">New conversation</button>
+      <button id="new" class="ghost" type="button">New<span class="long"> conversation</span></button>
     </div>
   </header>
-  <main>
-    <p class="note">All pupils are synthetic. Each turn asks the curriculum map for a briefing before the tutor replies.</p>
-    <div id="log" aria-live="polite"></div>
-  </main>
-  <form id="form">
-    <textarea id="msg" rows="2" placeholder="Type as the pupil…" required></textarea>
-    <button id="send" type="submit">Send</button>
-  </form>
+
+  <div class="shell">
+    <main class="chat">
+      <div id="log" aria-live="polite">
+        <section id="welcome" class="welcome">
+          <h1 id="hello">Hello!</h1>
+          <p>What are you working on? Ask about anything from class, try a question, or check an answer.</p>
+          <div id="starters" class="chips"></div>
+          <p class="fine">All pupils here are synthetic. Each turn asks the curriculum map for a briefing before the tutor replies.</p>
+        </section>
+      </div>
+
+      <form id="form" class="composer">
+        <div id="quick" class="chips quick" hidden></div>
+        <div class="row">
+          <textarea id="msg" rows="1" placeholder="Type your message…" aria-label="Your message" required></textarea>
+          <button id="mic" class="icon" type="button" title="Speak" aria-label="Speak your message" hidden>🎤</button>
+          <button id="send" class="primary" type="submit">Send</button>
+        </div>
+      </form>
+    </main>
+
+    <aside id="lesson" class="lesson" aria-label="Lesson">
+      <section class="card" id="topicCard">
+        <h2>This lesson</h2>
+        <p id="topic" class="topic muted">Send a message to start.</p>
+        <p id="topicWhen" class="badge" hidden></p>
+        <dl id="method" class="method" hidden></dl>
+        <p id="nextUp" class="next" hidden></p>
+      </section>
+      <section class="card">
+        <h2>Your progress today</h2>
+        <div id="progress" class="dots" aria-label="Answers checked this session"></div>
+        <p id="progressNote" class="muted small">Answers you give will show here.</p>
+      </section>
+      <section class="card">
+        <h2>Scheme of work</h2>
+        <ol id="scheme" class="scheme"><li class="placeholder muted small">Appears after your first message.</li></ol>
+        <p id="text" class="muted small" hidden></p>
+      </section>
+      <section class="card tester-only" id="testerCard">
+        <h2>Briefing (tester view)</h2>
+        <p class="muted small">What the map sent for the latest turn. Pupils never see this.</p>
+        <pre id="briefing" class="json">No turn yet.</pre>
+      </section>
+    </aside>
+  </div>
+
+  <script src="/static/widgets.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>
