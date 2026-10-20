@@ -25,6 +25,8 @@ pupil message ─▶ briefing.py ─▶ prompting.py ─▶ model.py ─▶ evid
 | `app/model.py` | One Claude call per turn. The full prompt and response are written to `data/turns/<date>/<turn_id>.json`. |
 | `app/evidence.py` | When the pupil answered a question, write it back as `activity` + `score` with `source: "tutor-experience"`, plus process events (attempt, hints opened, confidence). |
 | `app/widgets.py` | Validate the optional interactive widgets the model attaches to a reply (UI only). |
+| `app/session.py` | The shape of a UI session: goal, warm-up recall, practice, wrap-up. Kept beside the transcript. |
+| `app/adjustments.py` | Enforce agreed adjustments on widgets in code; audit the reply text against them. |
 | `app/lesson.py` | The lesson panel's view of the briefing: topic, scheme of work, method, next step. |
 | `app/turn.py` | The two entry points: UI turns and harness turns. |
 | `app/main.py` | FastAPI routes: `/` (chat UI), `/api/pupils`, `/api/turn`, `/webhook/tutor`, `/health`. |
@@ -56,6 +58,10 @@ make test                   # no network: the map and the model are both mocked
 
 Pick a pupil, then type (or speak) as them. The interface is built for guided learning:
 
+- **A session shape**: the tutor agrees a goal on the first turn (from the briefing's focus; a flagged "first look"
+  when it isn't taught yet), asks one quick warm-up recall question on an earlier taught topic, then practises towards
+  the goal. **Finish** asks for a three-sentence wrap-up and shows a summary card (goal, answers, warm-up, next time).
+  A stage bar above the chat shows Goal → Warm-up → Practice → Wrap-up.
 - **Starters and quick actions** ("I'm stuck", "Show me an example", "Explain it another way") so a pupil always has a
   next move.
 - **Interactive widgets** under a reply when the tutor chooses them: an answer box or choices, a hint ladder revealed
@@ -121,6 +127,19 @@ make ping TUTOR_ID=<id printed by register>
   harness scores the text alone. The prompt therefore requires the reply text to make complete sense without widgets,
   and says agreed adjustments, the scope rule and the class's method apply to widgets too. The browser builds every
   widget with DOM APIs, never `innerHTML`.
+- **Sessions exist only in the UI.** The session plan is conversation state stored next to the transcript and rebuilt
+  into a short "This session" block each turn. It ranks below agreed adjustments, the scope rule and what the pupil
+  has just asked. Harness turns are single turns with no conversation, so they get no session block: their prompt is
+  byte-for-byte what it was. The warm-up topic is a taught prerequisite of the focus where possible (retrieval that
+  also primes the goal), never the focus and never untaught. A warm-up answer is written back titled with the warm-up
+  topic, not the focus, and without the focus's misconception.
+- **Agreed adjustments are enforced on widgets in code.** The briefing gives only instruction text, so
+  `app/adjustments.py` recognises each of the map's 20 adjustments by a key phrase (tested against the map's
+  vocabulary) and reports any wording it can't recognise. It trims or drops widgets: no hints or worked steps (and no
+  balance "result") before an attempt; one step only; a single smallest hint; no second question; one widget under
+  minimal text; no balance scales if the class uses another method. It never adds a widget. Reply text is audited, not
+  rewritten (word count, long sentences, question count, missing visual), and the flags go to the turn log and the
+  tester view. With no briefing the pupil's adjustments are unknown, so only the answer box is shown.
 - **The `raw` pack is passed verbatim.** Reorganising it would test our renderer rather than the map's organisation.
 - **The same fixed rules apply in every condition**, including the hidden assessment instruction, so conditions differ
   only in the context they carry.
@@ -148,9 +167,11 @@ make ping TUTOR_ID=<id printed by register>
 - **Streaming replies** in the UI. Turns are short, and a single JSON response keeps the webhook and UI paths identical.
 - **Maths typesetting** (KaTeX or similar). Replies are plain text so they read the same to the harness; the widgets
   carry the visual load.
-- **Checking widgets against agreed adjustments in code** (for example, dropping a multi-step "steps" widget when "one
-  step at a time" is required). For now the prompt carries that rule; the turn logs record every widget so it can be
-  audited.
+- **Enforcing adjustments on the reply text** (rather than auditing it), and adjustments that need judgement
+  (plain words, concrete first, stay within taught content). These stay with the prompt; the audit flags show where it
+  slips.
+- **Spaced retrieval across sessions.** The warm-up picks from the current briefing only; choosing what is due for
+  review would need the map's evidence history, which the map owns.
 - **Pupil-facing safeguarding and moderation** beyond the model's own behaviour. This needs a policy decision before
   any real pupil sees it.
 - **Multi-turn harness scenarios.** The harness sends single turns with no history, so the webhook keeps none.
