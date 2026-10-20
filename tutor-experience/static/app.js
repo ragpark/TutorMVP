@@ -125,6 +125,13 @@ function addTutor(body) {
   }
   if (body.briefing_ok === false) meta.append(el("span", { class: "tag part" }, "No briefing from the map"));
   if (body.focus) meta.append(el("span", { class: "tag tester-only" }, `Focus: ${body.focus}`));
+  const adj = body.adjustments;
+  if (adj && (adj.applied.length || adj.widget_changes.length)) {
+    const notes = [...adj.widget_changes, ...(adj.text_flags || []).map((f) => `text: ${f}`),
+                   ...adj.unrecognised.map((u) => `unrecognised adjustment: ${u}`)];
+    meta.append(el("span", { class: "tag tester-only" }, `Adjustments: ${adj.applied.join(", ") || "none"}`));
+    if (notes.length) meta.append(el("ul", { class: "audit tester-only" }, notes.map((n) => el("li", {}, n))));
+  }
   bubble.append(meta);
 
   $("log").append(el("div", { class: "msg tutor" }, el("div", { class: "avatar", "aria-hidden": "true" }, "T"), bubble));
@@ -171,6 +178,36 @@ function renderLesson(lesson, briefing) {
   if (!txt.hidden) txt.textContent = `Studied so far: ${lesson.text_studied.join(", ")}.` + (lesson.text_coming && lesson.text_coming.length ? ` Coming up: ${lesson.text_coming.join(", ")}.` : "");
 }
 
+// ---------------------------------------------------------------- session shape
+const STAGES = ["goal", "warm_up", "practice", "wrap_up"];
+
+function renderSession(sess) {
+  $("sessionBar").hidden = !sess;
+  if (!sess) return;
+  $("goal").textContent = sess.goal ? (sess.goal_is_preview ? `First look: ${sess.goal}` : sess.goal) : "Whatever you need";
+  $("goal").title = $("goal").textContent;
+  // stage shown is where the session is now: the server reports the stage for the next turn
+  const now = STAGES.indexOf(sess.phase);
+  document.querySelectorAll("#stages li").forEach((li) => {
+    const i = STAGES.indexOf(li.dataset.stage);
+    li.hidden = li.dataset.stage === "warm_up" && !sess.recall_topic;
+    li.className = i < now ? "done" : i === now ? "now" : "";
+    if (li.dataset.stage === "warm_up" && sess.recall_topic) li.title = `Warm-up: ${sess.recall_topic}`;
+  });
+  $("finish").disabled = sess.finished;
+}
+
+function addSummary(sess) {
+  const rows = [["Goal", sess.goal || "—"], ["Answers", `${sess.correct} of ${sess.answers} right`]];
+  if (sess.recall_topic) rows.push(["Warm-up", `${sess.recall_topic}: ${sess.recall_result || "not done"}`]);
+  if (sess.next_topic) rows.push(["Next time", sess.next_topic]);
+  $("log").append(el("section", { class: "summary", "aria-label": "Session summary" },
+    el("h2", {}, "Session complete"),
+    el("dl", {}, rows.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)])),
+    el("button", { type: "button", class: "primary", onclick: reset }, "Start a new session")));
+  scrollDown();
+}
+
 function addProgress(ev) {
   if (!ev || !ev.ok) return;
   const s = ev.score;
@@ -207,6 +244,7 @@ function reset() {
   $("progress").replaceChildren();
   $("progressNote").textContent = "Answers you give will show here.";
   $("briefing").textContent = "No turn yet.";
+  renderSession(null);
 }
 
 async function loadPupils() {
@@ -223,7 +261,7 @@ async function loadPupils() {
   }
 }
 
-async function submit(text) {
+async function submit(text, finish = false) {
   const p = current();
   const message = (text ?? $("msg").value).trim();
   if (!p || !message || busy) return;
@@ -241,13 +279,15 @@ async function submit(text) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ pupil: p.id, subject: p.subject, message, conversation_id: conversationId,
                              record_evidence: $("evidence").checked, elapsed_s: lastReplyAt ? secondsSinceReply() : null,
-                             events }),
+                             events, finish }),
     });
     const body = await r.json();
     if (!r.ok) throw new Error(body.detail || r.statusText);
     typing.remove();
     addTutor(body);
     renderLesson(body.lesson, body.briefing);
+    renderSession(body.session);
+    if (finish && body.session) addSummary(body.session);
     addProgress(body.evidence);
     $("quick").hidden = false;
     lastReplyAt = Date.now();
@@ -271,6 +311,7 @@ function grow() {
 // ---------------------------------------------------------------- wiring
 $("pupil").addEventListener("change", reset);
 $("new").addEventListener("click", reset);
+$("finish").addEventListener("click", () => submit("I'd like to finish for today.", true));
 $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
 $("msg").addEventListener("input", grow);
 $("msg").addEventListener("keydown", (e) => {

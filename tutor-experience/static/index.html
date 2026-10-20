@@ -28,6 +28,16 @@
 
   <div class="shell">
     <main class="chat">
+      <div id="sessionBar" class="session-bar" hidden>
+        <div class="goal"><span class="label">Today's goal</span><span id="goal"></span></div>
+        <ol id="stages" class="stages" aria-label="Session stages">
+          <li data-stage="goal">Goal</li>
+          <li data-stage="warm_up">Warm-up</li>
+          <li data-stage="practice">Practice</li>
+          <li data-stage="wrap_up">Wrap-up</li>
+        </ol>
+        <button id="finish" type="button" title="Wrap up with a short summary">Finish</button>
+      </div>
       <div id="log" aria-live="polite">
         <section id="welcome" class="welcome">
           <h1 id="hello">Hello!</h1>
